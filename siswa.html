@@ -16,6 +16,13 @@
     }
     *{box-sizing:border-box;margin:0}
     body{font-family:var(--font);color:var(--ink);min-height:100vh;background:var(--krem)}
+
+    /* ===== anti-copy: teks soal tidak bisa di-highlight/diseleksi ===== */
+    body{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none}
+    /* cegah seleksi & tarik teks + tekan popup salin long-press di HP */
+    html,body{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    /* kolom login tetap bisa diketik & diedit siswa */
+    input,textarea,[contenteditable="true"]{-webkit-user-select:text;-moz-user-select:text;user-select:text;-webkit-touch-callout:default}
     button{font-family:inherit;color:inherit;cursor:pointer}
     :focus-visible{outline:3px solid var(--ink);outline-offset:3px}
     .app{width:100%;min-height:100vh;display:flex;flex-direction:column}
@@ -91,11 +98,18 @@
     .opsi button:hover:not(:disabled){transform:translateY(-2px);background:#EAF7FF}
     .opsi button.benar{background:var(--hijau)}
     .opsi button.salah{background:var(--pink)}
+    .opsi button.pilih{background:var(--kuning);box-shadow:inset 0 0 0 3px var(--ink);transform:translateY(-2px)}
+    .opsi button.pilih:hover:not(:disabled){background:var(--kuning)}
     .opsi button:disabled{cursor:default}
     .umpan{min-height:28px;font-weight:600;font-size:16px;line-height:1.35;margin:14px 0 6px}
     .umpan b{font-weight:700}
     .umpan.ok{background:rgba(183,201,106,.45);border:3px solid var(--ink);border-radius:14px;padding:10px 12px}
     .umpan.no{background:rgba(249,139,169,.45);border:3px solid var(--ink);border-radius:14px;padding:10px 12px}
+    .konfirmasi{background:var(--hijau);border:3px solid var(--ink);border-radius:999px;font-weight:700;font-size:16px;padding:9px 26px;
+      box-shadow:0 4px 0 rgba(31,29,43,.35);transition:transform .12s,box-shadow .12s}
+    .konfirmasi:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(31,29,43,.35)}
+    .konfirmasi:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(31,29,43,.35)}
+    .konfirmasi[hidden]{display:none}
     .tutup{background:var(--biru);border:3px solid var(--ink);border-radius:999px;font-weight:700;font-size:16px;padding:9px 26px}
     .tutup[hidden]{display:none}
 
@@ -115,17 +129,49 @@
     .tombol:hover{transform:translateY(-2px)}
     .tombol:active{transform:translateY(2px)}
     .tombol.utama{width:100%;background:var(--pink);font-size:18px;margin-top:14px}
-    .kotak.akhir{text-align:center;width:min(92vw,470px)}
+    .kotak.akhir{text-align:center;width:min(94vw,780px);max-height:92vh;overflow:auto}
     .kotak.akhir .nilai{font-size:clamp(56px,16vw,96px);font-weight:700;line-height:1;margin:10px 0 4px;color:var(--ink);
       -webkit-text-stroke:3px var(--ink);paint-order:stroke fill}
     .kotak.akhir .sub2{font-weight:600;line-height:1.4;margin-bottom:18px}
+
+    /* ===== review / riwayat jawaban (neubrutalism) ===== */
+    .kotak.akhir h1{font-size:clamp(26px,5vw,40px);font-weight:700;line-height:1.1;margin:12px 0 4px}
+    .akhir-aksi{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+    .akhir-aksi .tombol{flex:1 1 180px}
+    .tombol.neo{background:#fff;border:3px solid var(--ink);box-shadow:4px 4px 0 0 #000;border-radius:0}
+    .tombol.neo:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 0 #000}
+    .tombol.neo:active{transform:translate(3px,3px);box-shadow:0 0 0 0 #000}
+    .tombol.neo.ungu{background:var(--ungu)}
+    .tombol.neo.biru{background:var(--biru)}
+
+    .reviewBlok{margin-top:22px;text-align:left;border-top:4px solid var(--ink);padding-top:20px}
+    .reviewBlok h2{background:none;border:0;padding:0;margin:0 0 4px;font-size:clamp(20px,3.4vw,26px);font-weight:700;display:block}
+    .reviewSub{font-weight:600;font-size:14px;line-height:1.35;margin-bottom:16px}
+    .reviewList{display:flex;flex-direction:column;gap:18px}
+    .reviewItem{background:#fff;border:4px solid var(--ink);border-radius:0;box-shadow:4px 4px 0 0 #000;
+      padding:16px;display:flex;flex-direction:column;gap:10px}
+    .reviewHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .reviewNo{border:3px solid var(--ink);border-radius:0;font-weight:700;font-size:14px;line-height:1;padding:6px 12px;
+      background:var(--kuning);box-shadow:3px 3px 0 0 #000}
+    .reviewBadge{border:4px solid var(--ink);border-radius:0;font-weight:700;font-size:14px;line-height:1;padding:7px 14px;letter-spacing:.5px}
+    .reviewBadge.ok{background:var(--hijau);color:var(--ink)}
+    .reviewBadge.no{background:#FF4949;color:#fff}
+    .reviewSoal{font-weight:600;font-size:clamp(15px,2vw,18px);line-height:1.4}
+    .reviewOpsi{display:flex;flex-direction:column;gap:9px}
+    .revOpt{border:3px solid var(--ink);border-radius:0;background:#fff;padding:9px 12px;font-weight:600;font-size:15px;line-height:1.3}
+    .revOpt.kunci{background:var(--hijau)}
+    .revOpt.pilih-salah{background:var(--pink)}
+    .revTandai{font-weight:700;margin-left:8px;white-space:nowrap}
+    .reviewFoot{display:flex;align-items:flex-start;gap:10px;border:3px solid var(--ink);border-radius:0;
+      padding:10px 12px;font-size:14px;font-weight:500;line-height:1.35;background:var(--krem)}
+    .reviewFoot .lbl{font-weight:700;flex:none}
 
     /* cheat modal */
     #cheatModal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(31,29,43,.85);padding:20px;margin:0;width:auto;border:0;box-shadow:none}
     #cheatModal[hidden]{display:none!important}
     #cheatModal::backdrop{background:rgba(31,29,43,.85)}
     #cheatModal .kotak{text-align:center}
-    #cheatModal .em{font-size:56px;animation:shk .6s infinite}
+    #cheatModal .punca{width:84px;height:84px;margin:0 auto;animation:shk .6s infinite}
     @keyframes shk{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 
     /* confetti */
@@ -154,6 +200,8 @@
   <symbol id="sp" viewBox="0 0 24 24"><path d="M12 1.5C12.8 7.5 16.5 11.2 22.5 12 16.5 12.8 12.8 16.5 12 22.5 11.2 16.5 7.5 12.8 1.5 12 7.5 11.2 11.2 7.5 12 1.5z" style="fill:var(--c,#fff);stroke:#1F1D2B;stroke-width:1.6;stroke-linejoin:round"/></symbol>
   <symbol id="sq" viewBox="0 0 24 24"><path d="M2 14c3-9 6-9 9 0s6 9 9 0" style="fill:none;stroke:var(--c,#F98BA9);stroke-width:3.4;stroke-linecap:round"/></symbol>
   <symbol id="cd" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14" style="fill:none;stroke:#1F1D2B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/></symbol>
+  <symbol id="wn" viewBox="0 0 24 24"><path d="M12 3.2L22 20.2H2z" style="fill:var(--c,#FF4949);stroke:#1F1D2B;stroke-width:2;stroke-linejoin:round"/><path d="M12 10v4.2" style="fill:none;stroke:#1F1D2B;stroke-width:2.6;stroke-linecap:round"/><circle cx="12" cy="17.4" r="1.4" style="fill:#1F1D2B"/></symbol>
+  <symbol id="hg" viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 4 5 5 5 9 0-4 5-5 5-9M7 21c0-4 5-5 5-9 0 4 5 5 5 9" style="fill:none;stroke:#1F1D2B;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"/><path d="M9.5 18h5l-2.5-2.5z" style="fill:#F4D77A;stroke:#1F1D2B;stroke-width:1.4;stroke-linejoin:round"/></symbol>
 </svg>
 
 <!-- ===== LOGIN ===== -->
@@ -168,7 +216,7 @@
     <label for="ab">No. presensi</label>
     <input id="ab" inputmode="numeric" maxlength="3" placeholder="Contoh: 12">
     <div id="lm" class="pesan" role="alert" aria-live="polite"></div>
-    <button id="start" class="tombol utama" type="button">Mulai latihan 🚀</button>
+    <button id="start" class="tombol utama" type="button">Mulai latihan</button>
   </div>
 </section>
 
@@ -215,6 +263,7 @@
   <p class="tanya" id="tanya"></p>
   <div class="opsi" id="opsi"></div>
   <p class="umpan" id="umpan" role="status" aria-live="polite"></p>
+  <button class="konfirmasi" id="konfirmasi" type="button" hidden>Konfirmasi Jawaban</button>
   <button class="tutup" id="tutup" type="button" hidden>Lanjut</button>
 </dialog>
 
@@ -224,7 +273,17 @@
     <h1 id="endt"></h1>
     <div class="nilai" id="en"></div>
     <p class="sub2" id="ed"></p>
-    <button id="again" class="tombol utama" type="button">Ulangi dari awal 🔁</button>
+    <div class="akhir-aksi">
+      <button id="again" class="tombol neo ungu" type="button">Ulangi Kuis</button>
+      <button id="beranda" class="tombol neo biru" type="button">Kembali ke Beranda</button>
+    </div>
+
+    <!-- ===== REVIEW / RIWAYAT JAWABAN ===== -->
+    <section class="reviewBlok" id="reviewBlok" hidden aria-labelledby="reviewJudul">
+      <h2 id="reviewJudul">Review Jawaban</h2>
+      <p class="reviewSub" id="reviewRingkas"></p>
+      <div class="reviewList" id="reviewList"></div>
+    </section>
   </div>
 </section>
 
@@ -323,18 +382,28 @@
     return updateParticipant(activeParticipantId, { status: status });
   }
 
-  function showCheatWarning() {
+  function showCheatWarning(reason) {
     cheatBlocked = true;
+    const sebab = reason || "Kamu terdeteksi <b>berpindah tab</b> atau <b>meminimalkan browser</b> saat mengerjakan ujian.";
     const box = $("cheatModal");
     box.innerHTML = `
       <div class="kotak">
-        <div class="em">🚫</div>
+        <svg class="punca" viewBox="0 0 24 24" aria-hidden="true"><use href="#wn" style="--c:#FF4949"/></svg>
         <h2 id="cheatTitle" style="margin-top:10px;font-size:28px;font-weight:700;background:none;border:0;padding:0;color:#FF4949">Kecurangan Terdeteksi!</h2>
-        <p style="font-weight:600;margin-top:10px;line-height:1.4">Kamu terdeteksi <b>berpindah tab</b> atau <b>meminimalkan browser</b> saat mengerjakan ujian.</p>
+        <p style="font-weight:600;margin-top:10px;line-height:1.4">${sebab}</p>
         <p style="font-weight:600;margin-top:10px;line-height:1.4">Status kamu telah ditandai <b>BLOCKED</b> dan dilaporkan ke pengawas.</p>
-        <p style="margin-top:16px;border:3px solid var(--ink);background:var(--kuning);border-radius:14px;padding:10px 12px;font-weight:700">⏳ Menunggu pengawas membuka blokir...</p>
+        <p style="margin-top:16px;border:3px solid var(--ink);background:var(--kuning);border-radius:14px;padding:10px 12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 24 24" style="width:22px;height:22px;flex:none" aria-hidden="true"><use href="#hg"/></svg><span>Menunggu pengawas membuka blokir...</span></p>
       </div>`;
     box.hidden = false;
+  }
+
+  /* ===== Anti-cheat tambahan: blokir siswa & lapor ke database (real-time) ===== */
+  function triggerCheatBlock(reason) {
+    if (cheatBlocked) return;                    // sudah diblokir, jangan dobel
+    if (!quizActive) return;                     // hanya saat kuis berjalan
+    cheatBlocked = true;                         // kunci lebih dulu (anti re-trigger)
+    showCheatWarning(reason);                    // modal peringatan Neo Brutalism
+    updateParticipantStatus("blocked");          // status peserta -> 'blocked' di Supabase
   }
 
   function hideCheatWarning() {
@@ -386,9 +455,74 @@
     updateParticipantStatus("blocked");
   });
 
+  /* =========================================================
+     ANTI-CHEAT TAMBAHAN (aktif HANYA saat quizActive === true)
+     1. Blokir klik kanan / long-press (contextmenu)
+     2. Blokir shortcut keyboard (copy/inspect/etc.)
+     3. Deteksi & blokir aksi copy / cut / paste
+     4. Blokir seleksi teks & tarik teks (selectstart / dragstart)
+     ========================================================= */
+
+  /* kolom input/textarea tetap boleh diseleksi & diketik */
+  function dalamInput(t) {
+    return t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+  }
+
+  /* 1. klik kanan / long-press di HP dimatikan saat kuis berjalan */
+  document.addEventListener("contextmenu", e => {
+    if (!quizActive || dalamInput(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    triggerCheatBlock("Kamu terdeteksi <b>menekan lama / klik kanan</b> pada soal saat ujian.");
+  }, true);
+
+  /* 2. shortcut keyboard berbahaya saat kuis berjalan */
+  document.addEventListener("keydown", e => {
+    if (!quizActive) return;
+    const k = (e.key || "").toLowerCase();
+    const blokir =
+      (e.ctrlKey || e.metaKey) && ["c", "v", "x", "u", "a", "s", "p"].includes(k) ||  // copas / inspect source / select all / save / print
+      (e.ctrlKey && e.shiftKey && ["i", "j", "c"].includes(k)) ||                     // devtools
+      (e.metaKey && e.altKey && ["i", "j", "c"].includes(k)) ||                       // devtools (mac)
+      k === "f12" ||                                                                  // devtools
+      ((e.ctrlKey || e.metaKey) && e.shiftKey && k === "k");                          // dup tab shortcut
+    if (!blokir) return;
+    if (dalamInput(e.target)) return;                                                 // ketik/copy normal di kolom login
+    e.preventDefault();
+    e.stopPropagation();
+    triggerCheatBlock("Kamu terdeteksi memakai <b>shortcut keyboard</b> yang dilarang saat ujian.");
+  }, true);
+
+  /* 3. deteksi aksi copy / cut / paste -> langsung blokir */
+  ["copy", "cut", "paste"].forEach(evt => {
+    document.addEventListener(evt, e => {
+      if (!quizActive || dalamInput(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const label = evt === "paste" ? "menempel (paste)" : evt === "cut" ? "memotong (cut)" : "menyalin (copy)";
+      triggerCheatBlock(`Kamu terdeteksi <b>${label}</b> soal/teks saat ujian berlangsung.`);
+    }, true);
+  });
+
+  /* 4. blokir seleksi teks (drag) & tarik teks -> tutup celah drag lalu Ctrl+C */
+  document.addEventListener("selectstart", e => {
+    if (!quizActive || dalamInput(e.target)) return;
+    e.preventDefault();
+  }, true);
+  document.addEventListener("dragstart", e => {
+    if (!quizActive || dalamInput(e.target)) return;
+    e.preventDefault();
+  }, true);
+
   /* ===== alur kuis ===== */
   let S;
-  function initState() { S = { done: {}, score: 0, streak: 0, best: 0 } }
+  function initState() {
+    S = {
+      done: {},      // { n: { pick, ok, opts } } -> jawaban tiap nomor
+      riwayat: [],   // riwayat pilihan siswa per nomor: riwayat[n] = indeks opsi yang dipilih
+      score: 0, streak: 0, best: 0
+    };
+  }
   function show(id) {
     $("login").hidden = id !== "login";
     $("app").hidden = id !== "app";
@@ -399,6 +533,7 @@
   let urut = [...Array(N).keys()];     // urutan nomor soal di papan
   let opsiAktif = [];                  // pilihan pada soal yang sedang dibuka
   let aktif = -1;
+  let pilihan = -1;                    // indeks opsi yang ditandai siswa (belum dikonfirmasi)
 
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0;[a[i], a[j]] = [a[j], a[i]] } return a }
 
@@ -427,6 +562,7 @@
 
   function buka(n) {
     aktif = n;
+    pilihan = -1;
     const prev = S.done[n];
     opsiAktif = prev ? prev.opts : shuffle(Q[n][1].map((t, k) => ({ t, ok: k === 0 })));
     $("dlgJudul").textContent = `Soal ${n + 1} dari ${N}`;
@@ -434,8 +570,18 @@
     $("opsi").innerHTML = opsiAktif.map((o, i) => `<button type="button" data-i="${i}">${o.t}</button>`).join("");
     $("umpan").textContent = ""; $("umpan").className = "umpan";
     $("tutup").hidden = true;
+    $("konfirmasi").hidden = true;
     $("dlg").showModal();
     if (prev) tandai(n, prev.pick, opsiAktif, true);
+  }
+
+  /* tandai pilihan (belum dikunci) lalu tampilkan tombol konfirmasi */
+  function pilih(i) {
+    if (aktif < 0 || S.done[aktif]) return;
+    pilihan = i;
+    document.querySelectorAll("#opsi button").forEach(b => b.classList.toggle("pilih", +b.dataset.i === i));
+    $("konfirmasi").hidden = false;
+    $("konfirmasi").focus();
   }
 
   function tandai(n, pick, opts, again) {
@@ -449,31 +595,81 @@
     const umpan = $("umpan");
     umpan.className = "umpan " + (ok ? "ok" : "no");
     umpan.innerHTML = ok
-      ? `🎉 <b>Benar!</b> &nbsp;${Q[n][2]}`
-      : `😵 <b>Salah.</b> Jawaban benar: <b>${Q[n][1][0]}</b>. ${Q[n][2]}`;
+      ? `<b>Benar!</b> &nbsp;${Q[n][2]}`
+      : `<b>Salah.</b> Jawaban benar: <b>${Q[n][1][0]}</b>. ${Q[n][2]}`;
     const t = $("tutup");
     t.textContent = selesai ? "Lihat hasil akhir" : "Tutup & pilih kartu lain";
     t.hidden = false;
+    $("konfirmasi").hidden = true;
     if (!again) t.focus();
   }
 
   function jawab(i) {
-    if (aktif < 0 || S.done[aktif]) return;
+    if (aktif < 0 || S.done[aktif] || i < 0) return;
     const n = aktif, opts = opsiAktif;
     const ok = opts[i].ok;
     S.done[n] = { pick: i, ok, opts };
+    S.riwayat[n] = i;   // simpan riwayat jawaban siswa untuk nomor ini
     if (ok) { S.score++; S.streak++; S.best = Math.max(S.best, S.streak); confetti() } else S.streak = 0;
     tandai(n, i, opts);
     statistik(); papan();
+  }
+
+  /* ===== review / riwayat jawaban (tampil setelah kuis selesai) ===== */
+  function escapeHtml(t) {
+    return String(t).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+  }
+
+  function renderReview() {
+    const list = $("reviewList");
+    const benar = Object.values(S.done).filter(d => d.ok).length;
+    const total = Object.keys(S.done).length;
+
+    $("reviewRingkas").innerHTML = `Kamu menjawab <b>${benar}</b> benar dari <b>${total}</b> soal. ` +
+      `Jawabanmu ditandai <b>hijau</b> bila benar dan <b>merah</b> bila salah, kunci jawaban selalu berwarna <b>hijau</b>.`;
+
+    list.innerHTML = urut.map(n => {
+      const data = S.done[n];
+      if (!data) return "";
+      const q = Q[n];
+      const opts = data.opts || [];
+      const pilih = (typeof data.pick === "number") ? data.pick : -1;
+      const statusCls = data.ok ? "ok" : "no";
+      const statusTxt = data.ok ? "BENAR ✓" : "SALAH ✗";
+
+      const opsiHtml = opts.map((o, k) => {
+        const kunci = !!o.ok;
+        const dipilih = k === pilih;
+        let cls = "revOpt", tandai = "";
+        if (kunci) { cls += " kunci"; }
+        if (dipilih && !kunci) { cls += " pilih-salah"; }
+        if (dipilih) tandai += `<span class="revTandai">Jawabanmu</span>`;
+        if (kunci) tandai += `<span class="revTandai">Kunci</span>`;
+        return `<div class="${cls}">${escapeHtml(o.t)}${tandai}</div>`;
+      }).join("");
+
+      return `<article class="reviewItem">
+        <div class="reviewHead">
+          <span class="reviewNo">Soal ${n + 1}</span>
+          <span class="reviewBadge ${statusCls}">${statusTxt}</span>
+        </div>
+        <p class="reviewSoal">${escapeHtml(q[0])}</p>
+        <div class="reviewOpsi">${opsiHtml}</div>
+        <div class="reviewFoot"><span class="lbl">Pembahasan:</span><span>${escapeHtml(q[2])}</span></div>
+      </article>`;
+    }).join("");
+
+    $("reviewBlok").hidden = false;
   }
 
   function finish() {
     const s = S.score;
     const nilai = s * 9 + 10;
     quizActive = false;
-    $("endt").textContent = s >= 9 ? "Luar biasa, " + S.n + "! 🏆" : s >= 6 ? "Bagus, " + S.n + "! 👏" : "Tetap semangat, " + S.n + "! 💪";
+    $("endt").textContent = s >= 9 ? "Luar biasa, " + S.n + "!" : s >= 6 ? "Bagus, " + S.n + "!" : "Tetap semangat, " + S.n + "!";
     $("en").textContent = nilai;
     $("ed").innerHTML = `Benar <b>${s}</b> dari ${N} soal.<br>Nilai kamu <b>${nilai}</b>. Rekor beruntun ${S.best} soal.<br>No. presensi ${S.a}.`;
+    renderReview();
     if (!cheatBlocked) updateParticipant(S.id, { status: "finished", "Score/Nilai": nilai });
     show("end");
     if (s >= 6) for (let i = 0; i < 3; i++) setTimeout(confetti, i * 400);
@@ -489,7 +685,8 @@
     urut = [...Array(N).keys()];
     S.n = n; S.a = a;
     $("totalSkor").textContent = N;
-    $("who").textContent = "👋 " + n + " · No. " + a;
+    $("who").textContent = n + " · No. " + a;
+    $("reviewBlok").hidden = true; $("reviewList").innerHTML = "";
     S.id = await insertParticipant(n, a);
     activeParticipantId = S.id;
     activeParticipantName = n;
@@ -512,10 +709,13 @@
   }
 
   $("grid").addEventListener("click", e => { const k = e.target.closest(".kartu"); if (k && !k.disabled) buka(+k.dataset.n); });
-  $("opsi").addEventListener("click", e => { const b = e.target.closest("button"); if (b && !b.disabled) jawab(+b.dataset.i); });
+  $("opsi").addEventListener("click", e => { const b = e.target.closest("button"); if (b && !b.disabled) pilih(+b.dataset.i); });
+  $("konfirmasi").addEventListener("click", () => jawab(pilihan));
   $("tutup").addEventListener("click", () => $("dlg").close());
   $("dlg").addEventListener("click", e => { if (e.target === $("dlg")) $("dlg").close() });
   $("dlg").addEventListener("close", () => {
+    pilihan = -1;
+    $("konfirmasi").hidden = true;
     aktif = -1;
     if (Object.keys(S.done).length === N) finish();
   });
@@ -529,6 +729,7 @@
   $("again").onclick = async () => {
     const n = S.n, a = S.a;
     initState(); urut = [...Array(N).keys()]; S.n = n; S.a = a;
+    $("reviewBlok").hidden = true; $("reviewList").innerHTML = "";
     teardownParticipantChannel();
     activeParticipantId = null; activeParticipantName = null;
     cheatBlocked = false; hideCheatWarning();
@@ -538,6 +739,25 @@
     quizActive = true;
     subscribeParticipantStatus();
     papan(); statistik(); show("app")
+  };
+
+  /* ===== Kembali ke Beranda: reset state kuis dengan bersih ===== */
+  $("beranda").onclick = () => {
+    quizActive = false;
+    cheatBlocked = false;
+    hideCheatWarning();
+    teardownParticipantChannel();
+    activeParticipantId = null; activeParticipantName = null;
+    initState();
+    urut = [...Array(N).keys()];
+    $("reviewBlok").hidden = true; $("reviewList").innerHTML = "";
+    $("grid").innerHTML = "";
+    $("nm").value = ""; $("ab").value = "";
+    $("lm").textContent = "";
+    $("nm").classList.remove("err"); $("ab").classList.remove("err");
+    $("who").textContent = "";
+    show("login");
+    setTimeout(() => $("nm").focus(), 50);
   };
 
   function confetti() {
