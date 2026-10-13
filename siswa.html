@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kombinasi - Matematika</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      /* palette: Sky, Lavender, Butter, Matcha, Pink, Tangerine */
+      --ink:#1F1D2B; --krem:#FFF8E6; --biru:#7FB9E6; --ungu:#D6BEEA; --kuning:#F4D77A; --pink:#F98BA9;
+      --hijau:#B7C96A; --oranye:#FF8F45;
+      --font:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+    }
+    *{box-sizing:border-box;margin:0}
+    body{font-family:var(--font);color:var(--ink);min-height:100vh;background:var(--krem)}
+    button{font-family:inherit;color:inherit;cursor:pointer}
+    :focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+    .app{width:100%;min-height:100vh;display:flex;flex-direction:column}
+    .app[hidden]{display:none!important}
+    .garis{border:3px solid var(--ink)}
+
+    /* ===== header ===== */
+    .top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+      background:var(--biru);border:3px solid var(--ink);border-radius:0;padding:14px 18px;position:relative;z-index:2}
+    .chip{display:inline-flex;align-items:center;gap:8px;background:#EAF7FF;border:3px solid var(--ink);border-radius:999px;
+      font-weight:600;font-size:clamp(15px,2vw,22px);padding:6px 18px;line-height:1.1}
+    .chip svg{width:26px;height:26px}
+    .chip.who{background:var(--kuning);font-size:clamp(13px,1.7vw,18px)}
+    .home{width:48px;height:48px;border-radius:12px;background:var(--pink);border:3px solid var(--ink);display:grid;place-items:center}
+    .home svg{width:28px;height:28px}
+
+    /* ===== badan (layar penuh) ===== */
+    .badan{flex:1;display:flex;background:var(--krem);border:0;border-top:3px solid var(--ink);
+      border-radius:0;overflow:hidden}
+    .papan{flex:1;display:flex;flex-direction:column;padding:14px;min-width:0}
+
+    /* bar atas papan */
+    .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--biru);border:3px solid var(--ink);
+      border-radius:18px;padding:10px 14px}
+    .soal-chip{background:var(--kuning);display:inline-flex;align-items:center;gap:8px;border:3px solid var(--ink);
+      border-radius:14px;font-weight:700;font-size:clamp(17px,2.2vw,24px);padding:6px 16px;white-space:nowrap}
+    .soal-chip svg{width:26px;height:26px}
+    .prog{flex:1;min-width:110px;height:22px;background:var(--krem);border:3px solid var(--ink);border-radius:999px;overflow:hidden}
+    .prog i{display:block;height:100%;width:8%;background:var(--ungu);border-right:3px solid var(--ink);transition:width .4s}
+    .stat{display:flex;flex-direction:column;gap:5px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border:3px solid var(--ink);border-radius:12px;font-weight:600;
+      font-size:15px;line-height:1;padding:5px 12px;white-space:nowrap}
+    .pill svg{width:18px;height:18px;flex:none}
+    .pill.skor{background:var(--hijau)}
+    .pill.beruntun{background:var(--oranye)}
+    .acak{background:var(--pink);border:3px solid var(--ink);border-radius:12px;font-weight:600;font-size:15px;padding:9px 14px;
+      display:inline-flex;align-items:center;gap:6px;transition:transform .12s}
+    .acak:hover{transform:translateY(-2px) rotate(-1deg)}
+    .acak svg{width:20px;height:20px}
+    .tip{display:flex;align-items:center;gap:10px;background:var(--krem);border:3px solid var(--ink);border-radius:18px;
+      padding:8px 14px;font-weight:500;font-size:14px;line-height:1.2}
+    .tip svg{width:26px;height:26px;flex:none}
+
+    /* kartu */
+    .grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(130px,1fr);gap:14px;margin-top:14px}
+    .kartu{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+      background:var(--c);border:3px solid var(--ink);border-radius:18px;box-shadow:0 6px 0 rgba(31,29,43,.35);
+      padding:8px;transition:transform .15s,box-shadow .15s}
+    .kartu:hover:not(:disabled){transform:translateY(-4px);box-shadow:0 10px 0 rgba(31,29,43,.35)}
+    .kartu:active:not(:disabled){transform:translateY(2px);box-shadow:0 3px 0 rgba(31,29,43,.35)}
+    .kartu .no{font-size:clamp(46px,min(8vw,14vh),120px);font-weight:700;line-height:1;color:#fff;
+      -webkit-text-stroke:7px var(--ink);paint-order:stroke fill}
+    .kartu .lbl{background:var(--krem);border:3px solid var(--ink);border-radius:999px;font-weight:600;font-size:clamp(11px,1.3vw,15px);padding:2px 16px}
+    .kartu .dk{position:absolute;width:clamp(18px,2.4vw,30px);height:clamp(18px,2.4vw,30px);pointer-events:none}
+    .kartu .dk.tl{top:8%;left:8%}.kartu .dk.tr{top:8%;right:8%}.kartu .dk.bl{bottom:22%;left:8%}.kartu .dk.br{bottom:22%;right:8%}
+    .kartu:disabled{cursor:default;filter:saturate(.45) brightness(1.05)}
+    .kartu .tanda{position:absolute;top:-10px;right:-10px;width:34px;height:34px;border-radius:50%;border:3px solid var(--ink);
+      display:grid;place-items:center;font-weight:700;font-size:18px;background:var(--hijau)}
+    .kartu .tanda.salah{background:var(--pink)}
+    .grid.kocok .kartu{animation:kocok .45s}
+    @keyframes kocok{30%{transform:rotate(-4deg) scale(.94)}70%{transform:rotate(4deg) scale(.94)}}
+
+    /* dialog soal */
+    dialog{margin:auto;width:min(92vw,560px);background:var(--krem);color:var(--ink);border:3px solid var(--ink);
+      border-radius:24px;padding:22px;box-shadow:0 8px 0 rgba(31,29,43,.4)}
+    dialog::backdrop{background:rgba(31,29,43,.55)}
+    dialog h2{font-size:15px;font-weight:600;background:var(--kuning);display:inline-block;border:3px solid var(--ink);
+      border-radius:999px;padding:3px 16px;margin-bottom:12px}
+    dialog .tanya{font-size:clamp(20px,3vw,26px);font-weight:600;line-height:1.25;margin-bottom:16px}
+    .opsi{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .opsi button{background:#fff;border:3px solid var(--ink);border-radius:14px;font-size:20px;font-weight:600;padding:12px;
+      transition:transform .12s,background .12s}
+    .opsi button:hover:not(:disabled){transform:translateY(-2px);background:#EAF7FF}
+    .opsi button.benar{background:var(--hijau)}
+    .opsi button.salah{background:var(--pink)}
+    .opsi button:disabled{cursor:default}
+    .umpan{min-height:28px;font-weight:600;font-size:16px;line-height:1.35;margin:14px 0 6px}
+    .umpan b{font-weight:700}
+    .umpan.ok{background:rgba(183,201,106,.45);border:3px solid var(--ink);border-radius:14px;padding:10px 12px}
+    .umpan.no{background:rgba(249,139,169,.45);border:3px solid var(--ink);border-radius:14px;padding:10px 12px}
+    .tutup{background:var(--biru);border:3px solid var(--ink);border-radius:999px;font-weight:700;font-size:16px;padding:9px 26px}
+    .tutup[hidden]{display:none}
+
+    /* layar login & akhir */
+    .layar{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;overflow:auto;background:var(--krem)}
+    .layar[hidden]{display:none!important}
+    .kotak{width:min(92vw,430px);background:var(--krem);border:3px solid var(--ink);border-radius:24px;padding:26px;box-shadow:0 8px 0 rgba(31,29,43,.4)}
+    .kotak .ikon{width:64px;height:64px;border-radius:18px;background:var(--pink);border:3px solid var(--ink);display:grid;place-items:center;font-size:30px;box-shadow:0 4px 0 rgba(31,29,43,.35)}
+    .kotak h1{font-size:34px;font-weight:700;line-height:1;margin:12px 0 4px}
+    .kotak p.sub{font-weight:500;margin-bottom:16px;line-height:1.3}
+    .kotak label{display:block;font-weight:700;margin:12px 0 6px}
+    .kotak input{width:100%;font:inherit;font-weight:600;color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 14px;outline:none}
+    .kotak input.err{border-color:#FF4949;background:#ffe1e1}
+    .pesan{min-height:22px;font-weight:700;color:#c2181f;margin-top:10px}
+    .tombol{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;
+      border:3px solid var(--ink);border-radius:14px;padding:12px 20px;transition:transform .12s,box-shadow .12s}
+    .tombol:hover{transform:translateY(-2px)}
+    .tombol:active{transform:translateY(2px)}
+    .tombol.utama{width:100%;background:var(--pink);font-size:18px;margin-top:14px}
+    .kotak.akhir{text-align:center;width:min(92vw,470px)}
+    .kotak.akhir .nilai{font-size:clamp(56px,16vw,96px);font-weight:700;line-height:1;margin:10px 0 4px;color:var(--ink);
+      -webkit-text-stroke:3px var(--ink);paint-order:stroke fill}
+    .kotak.akhir .sub2{font-weight:600;line-height:1.4;margin-bottom:18px}
+
+    /* cheat modal */
+    #cheatModal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(31,29,43,.85);padding:20px;margin:0;width:auto;border:0;box-shadow:none}
+    #cheatModal[hidden]{display:none!important}
+    #cheatModal::backdrop{background:rgba(31,29,43,.85)}
+    #cheatModal .kotak{text-align:center}
+    #cheatModal .em{font-size:56px;animation:shk .6s infinite}
+    @keyframes shk{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+    /* confetti */
+    .conf{position:fixed;top:-20px;width:12px;height:16px;border:2px solid var(--ink);z-index:70;pointer-events:none;animation:cf 1.6s ease-in forwards}
+    @keyframes cf{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+
+    /* responsif */
+    @media (max-width:900px){
+      .grid{grid-template-columns:repeat(3,1fr)}
+      .top{justify-content:center}
+    }
+    @media (max-width:560px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+      .tip{width:100%}
+    }
+    @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  </style>
+</head>
+
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="bt" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.2l7.1-.6z" style="fill:var(--c,#F4D77A);stroke:#1F1D2B;stroke-width:1.8;stroke-linejoin:round"/></symbol>
+  <symbol id="pl" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" style="fill:none;stroke:var(--c,#fff);stroke-width:5;stroke-linecap:round"/></symbol>
+  <symbol id="sg" viewBox="0 0 24 24"><path d="M12 22L3 4h18z" style="fill:var(--c,#F98BA9);stroke:#1F1D2B;stroke-width:1.8;stroke-linejoin:round" transform="rotate(180 12 12) scale(.8) translate(3 3)"/></symbol>
+  <symbol id="sp" viewBox="0 0 24 24"><path d="M12 1.5C12.8 7.5 16.5 11.2 22.5 12 16.5 12.8 12.8 16.5 12 22.5 11.2 16.5 7.5 12.8 1.5 12 7.5 11.2 11.2 7.5 12 1.5z" style="fill:var(--c,#fff);stroke:#1F1D2B;stroke-width:1.6;stroke-linejoin:round"/></symbol>
+  <symbol id="sq" viewBox="0 0 24 24"><path d="M2 14c3-9 6-9 9 0s6 9 9 0" style="fill:none;stroke:var(--c,#F98BA9);stroke-width:3.4;stroke-linecap:round"/></symbol>
+  <symbol id="cd" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14" style="fill:none;stroke:#1F1D2B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/></symbol>
+</svg>
+
+<!-- ===== LOGIN ===== -->
+<section class="layar" id="login">
+  <div class="kotak">
+    <div class="ikon">✦</div>
+    <h1>Kombinasi</h1>
+    <p class="sub">Latihan 10 soal matematika. Isi data dulu, lalu jawab soal-soalnya.</p>
+
+    <label for="nm">Nama</label>
+    <input id="nm" autocomplete="name" placeholder="Contoh: Rani Singh">
+    <label for="ab">No. presensi</label>
+    <input id="ab" inputmode="numeric" maxlength="3" placeholder="Contoh: 12">
+    <div id="lm" class="pesan" role="alert" aria-live="polite"></div>
+    <button id="start" class="tombol utama" type="button">Mulai latihan 🚀</button>
+  </div>
+</section>
+
+<!-- ===== APP / GAME ===== -->
+<div class="app" id="app" hidden>
+  <header class="top">
+    <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bt"/></svg>Matematika Peluang Kombinasi</span>
+    <span class="chip who" id="who"></span>
+    <span class="chip">XII SIJA 2</span>
+    <a class="home" href="#" aria-label="Beranda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+    </a>
+  </header>
+
+  <div class="badan">
+    <main class="papan">
+      <div class="bar">
+        <span class="soal-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bt"/></svg><span id="chipSoal">Soal 0/10</span></span>
+        <div class="prog" role="progressbar" aria-label="Kemajuan" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="prog"><i id="progIsi"></i></div>
+
+        <!-- Skor ditaruh di atas Beruntun -->
+        <div class="stat">
+          <span class="pill skor"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bt"/></svg>Skor <b id="skor">0</b>/<span id="totalSkor">10</span></span>
+          <span class="pill beruntun"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="#F4D77A" stroke="#1F1D2B" stroke-width="1.8" stroke-linejoin="round"/></svg>Beruntun <b id="beruntun">0</b></span>
+        </div>
+
+        <button class="acak" id="acak" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h4c4 0 6 10 10 10h4M3 17h4c1.500 0 2.700-1 3.700-2.500M14 8.500C15 7.500 16 7 17 7h4M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>Acak Kartu
+        </button>
+        <div class="tip">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.500c.8.800 1 1.500 1 2.500h6c0-1 .2-1.700 1-2.500A6 6 0 0 0 12 3z" fill="#F4D77A" stroke="#1F1D2B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Pilih kartu<br>soal yang tersedia!</span>
+        </div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== DIALOG SOAL ===== -->
+<dialog id="dlg" aria-labelledby="dlgJudul">
+  <h2 id="dlgJudul"></h2>
+  <p class="tanya" id="tanya"></p>
+  <div class="opsi" id="opsi"></div>
+  <p class="umpan" id="umpan" role="status" aria-live="polite"></p>
+  <button class="tutup" id="tutup" type="button" hidden>Lanjut</button>
+</dialog>
+
+<!-- ===== END ===== -->
+<section class="layar" id="end" hidden>
+  <div class="kotak akhir">
+    <h1 id="endt"></h1>
+    <div class="nilai" id="en"></div>
+    <p class="sub2" id="ed"></p>
+    <button id="again" class="tombol utama" type="button">Ulangi dari awal 🔁</button>
+  </div>
+</section>
+
+<!-- ===== CHEAT MODAL ===== -->
+<div id="cheatModal" hidden role="alertdialog" aria-modal="true" aria-labelledby="cheatTitle"></div>
+
+<script>
+  /* =========================================================
+     10 SOAL MATEMATIKA
+     Format: [teks soal, [pilihan... jawaban benar di indeks 0], pembahasan, simbol]
+     ========================================================= */
+  const Q = [
+    ["Berapakah hasil 3/4 + 2/3?", ["17/12", "5/7", "5/12", "11/12", "6/7"], "Samakan penyebut dulu: 3/4 = 9/12 dan 2/3 = 8/12. Jumlahnya 17/12. Penyebut tidak boleh dijumlahkan langsung.", "+"],
+    ["Berapakah 15% dari 240?", ["36", "24", "30", "40", "48"], "15% = 15/100. Maka 15/100 × 240 = 36.", "%"],
+    ["Nilai x pada persamaan 2x + 7 = 21 adalah ...", ["7", "5", "6", "14", "28"], "Kurangi kedua ruas dengan 7: 2x = 14. Bagi 2: x = 7. Jangan lupa membagi dengan koefisien x.", "x"],
+    ["Luas lingkaran berjari-jari 7 cm (π = 22/7) adalah ...", ["154 cm²", "44 cm²", "49 cm²", "308 cm²", "22 cm²"], "Luas = π × r × r = 22/7 × 7 × 7 = 154 cm². 44 itu keliling, bukan luas.", "π"],
+    ["Keliling persegi panjang dengan panjang 12 cm dan lebar 5 cm adalah ...", ["34 cm", "17 cm", "60 cm", "30 cm", "24 cm"], "Keliling = 2 × (p + l) = 2 × 17 = 34 cm. 60 adalah luasnya.", "▭"],
+    ["Hasil dari (−8) + (−5) − (−3) adalah ...", ["−10", "−16", "0", "10", "−6"], "(−8) + (−5) = −13. Mengurangi −3 sama dengan menambah 3, jadi −13 + 3 = −10.", "−"],
+    ["Hasil dari √144 + 5² adalah ...", ["37", "29", "17", "169", "60"], "√144 = 12 dan 5² = 25. Jumlahnya 37. 5² itu 5 × 5, bukan 5 × 2.", "√"],
+    ["KPK dari 12 dan 18 adalah ...", ["36", "6", "24", "72", "216"], "12 = 2² × 3 dan 18 = 2 × 3². KPK memakai pangkat terbesar: 2² × 3² = 36. 6 adalah FPB-nya.", "∞"],
+    ["Mobil menempuh 180 km dalam waktu 2,5 jam. Kecepatannya adalah ...", ["72 km/jam", "60 km/jam", "70 km/jam", "75 km/jam", "450 km/jam"], "Kecepatan = jarak ÷ waktu = 180 ÷ 2,5 = 72 km/jam. 450 muncul jika jarak dikali waktu, itu keliru.", "⏱"],
+    ["Sisi siku-siku suatu segitiga 6 cm dan 8 cm. Panjang hipotenusanya ...", ["10 cm", "14 cm", "12 cm", "7 cm", "100 cm"], "c² = 6² + 8² = 36 + 64 = 100, sehingga c = √100 = 10 cm. Jangan lupa menarik akar di akhir.", "△"]
+  ];
+  const N = Q.length;
+
+  // Warna & hiasan mengikuti POSISI kartu (bukan nomornya), jadi tetap rapi saat dikocok
+  const WARNA = ["#7FB9E6","#D6BEEA","#F4D77A","#F98BA9","#B7C96A","#D6BEEA","#B7C96A","#FF8F45","#7FB9E6","#F98BA9"];
+  const DEKOR = [
+    [["bt","tr","#F4D77A"],["sg","bl","#F98BA9"]], [["pl","tr","#B7C96A"]], [["sq","tr","#F98BA9"],["sp","bl","#fff"]],
+    [["sg","tr","#B7C96A"],["bt","br","#F4D77A"]], [["sp","tr","#F4D77A"],["cd","br","#1F1D2B"]], [["bt","tl","#F4D77A"]],
+    [["pl","tr","#F98BA9"]], [["sg","br","#F98BA9"]], [["sp","tr","#F4D77A"]], [["sq","br","#7FB9E6"]]
+  ];
+
+  const $ = id => document.getElementById(id);
+
+  /* ===== Supabase config ===== */
+  const SUPABASE_URL = "https://trbljscjcinduiwzaord.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyYmxqc2NqY2luZHVpd3phb3JkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MDMzODQsImV4cCI6MjEwNzM3OTM4NH0.Ark6HpYsQPU6q9AHjLmrHZ-GEXMELXxVuGUe_1T1Aw4";
+  const supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  /* insert peserta saat mulai ujian */
+  async function insertParticipant(name, attendance) {
+    if (!supabaseClient) return null;
+    const { data, error } = await supabaseClient
+      .from("participants")
+      .insert({ name: name, attendance_number: attendance, status: "active", final_score: null })
+      .select("id")
+      .single();
+    if (error) { console.error("Gagal insert peserta:", error); return null }
+    return data ? data.id : null;
+  }
+
+  /* update status/skor peserta saat selesai */
+  async function updateParticipant(id, patch) {
+    if (!supabaseClient || !id) return false;
+    const { error } = await supabaseClient
+      .from("participants")
+      .update(patch)
+      .eq("id", id);
+    if (error) { console.error("Gagal update peserta:", error); return false }
+    return true;
+  }
+
+  /* ===== Anti-cheat: state peserta aktif ===== */
+  let activeParticipantId = null;
+  let activeParticipantName = null;
+  let participantChannel = null;
+  let quizActive = false;
+  let cheatBlocked = false;
+
+  /* ubah kolom status peserta di tabel participants (real-time) */
+  async function updateParticipantStatus(status) {
+    if (!activeParticipantId) return false;
+    return updateParticipant(activeParticipantId, { status: status });
+  }
+
+  function showCheatWarning() {
+    cheatBlocked = true;
+    const box = $("cheatModal");
+    box.innerHTML = `
+      <div class="kotak">
+        <div class="em">🚫</div>
+        <h2 id="cheatTitle" style="margin-top:10px;font-size:28px;font-weight:700;background:none;border:0;padding:0;color:#FF4949">Kecurangan Terdeteksi!</h2>
+        <p style="font-weight:600;margin-top:10px;line-height:1.4">Kamu terdeteksi <b>berpindah tab</b> atau <b>meminimalkan browser</b> saat mengerjakan ujian.</p>
+        <p style="font-weight:600;margin-top:10px;line-height:1.4">Status kamu telah ditandai <b>BLOCKED</b> dan dilaporkan ke pengawas.</p>
+        <p style="margin-top:16px;border:3px solid var(--ink);background:var(--kuning);border-radius:14px;padding:10px 12px;font-weight:700">⏳ Menunggu pengawas membuka blokir...</p>
+      </div>`;
+    box.hidden = false;
+  }
+
+  function hideCheatWarning() {
+    cheatBlocked = false;
+    const box = $("cheatModal");
+    box.hidden = true;
+    box.innerHTML = "";
+  }
+
+  /* dipanggil saat admin meng-unblock (status berubah menjadi active) */
+  function resumeAfterUnblock() {
+    const wasBlocked = cheatBlocked;
+    hideCheatWarning();
+    if (wasBlocked) {
+      const c = document.createElement("i");
+      c.className = "conf";
+      c.style.left = "50vw"; c.style.background = "#00E5FF";
+      document.body.appendChild(c); setTimeout(() => c.remove(), 1600);
+    }
+  }
+
+  /* dengarkan perubahan status dari admin.html secara real-time */
+  function subscribeParticipantStatus() {
+    if (!supabaseClient || !activeParticipantId || participantChannel) return;
+    participantChannel = supabaseClient
+      .channel("participant-" + activeParticipantId)
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "participants", filter: "id=eq." + activeParticipantId },
+        payload => {
+          const newStatus = payload.new ? String(payload.new.status || "").toLowerCase() : "";
+          if (newStatus === "active") resumeAfterUnblock();
+          else if (newStatus === "blocked" && quizActive && !cheatBlocked) showCheatWarning();
+        })
+      .subscribe();
+  }
+
+  function teardownParticipantChannel() {
+    if (participantChannel) {
+      supabaseClient && supabaseClient.removeChannel(participantChannel);
+      participantChannel = null;
+    }
+  }
+
+  /* deteksi pindah tab / minimize */
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) return;
+    if (!quizActive || cheatBlocked) return;
+    showCheatWarning();
+    updateParticipantStatus("blocked");
+  });
+
+  /* ===== alur kuis ===== */
+  let S;
+  function initState() { S = { done: {}, score: 0, streak: 0, best: 0 } }
+  function show(id) {
+    $("login").hidden = id !== "login";
+    $("app").hidden = id !== "app";
+    $("end").hidden = id !== "end";
+    window.scrollTo(0, 0);
+  }
+
+  let urut = [...Array(N).keys()];     // urutan nomor soal di papan
+  let opsiAktif = [];                  // pilihan pada soal yang sedang dibuka
+  let aktif = -1;
+
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0;[a[i], a[j]] = [a[j], a[i]] } return a }
+
+  function papan() {
+    const g = $("grid");
+    g.innerHTML = urut.map((n, pos) => {
+      const h = S.done[n];
+      return `<button class="kartu" type="button" data-n="${n}" style="--c:${WARNA[pos % WARNA.length]}" ${h ? "disabled" : ""}
+          aria-label="Soal ${n + 1}${h ? (h.ok ? ", benar" : ", salah") : ""}">
+        ${DEKOR[pos % DEKOR.length].map(([s, p, c]) => `<svg class="dk ${p}" viewBox="0 0 24 24" style="--c:${c}" aria-hidden="true"><use href="#${s}"/></svg>`).join("")}
+        <span class="no">${n + 1}</span><span class="lbl">Soal ${n + 1}</span>
+        ${h ? `<span class="tanda ${h.ok ? "" : "salah"}" aria-hidden="true">${h.ok ? "✓" : "✗"}</span>` : ""}
+      </button>`;
+    }).join("");
+  }
+
+  function statistik() {
+    const jawab = Object.keys(S.done).length;
+    $("chipSoal").textContent = `Soal ${jawab}/${N}`;
+    $("progIsi").style.width = Math.max(8, jawab / N * 100) + "%";
+    $("prog").setAttribute("aria-valuenow", jawab);
+    $("prog").setAttribute("aria-valuemax", N);
+    $("skor").textContent = S.score;
+    $("beruntun").textContent = S.streak;
+  }
+
+  function buka(n) {
+    aktif = n;
+    const prev = S.done[n];
+    opsiAktif = prev ? prev.opts : shuffle(Q[n][1].map((t, k) => ({ t, ok: k === 0 })));
+    $("dlgJudul").textContent = `Soal ${n + 1} dari ${N}`;
+    $("tanya").textContent = Q[n][0];
+    $("opsi").innerHTML = opsiAktif.map((o, i) => `<button type="button" data-i="${i}">${o.t}</button>`).join("");
+    $("umpan").textContent = ""; $("umpan").className = "umpan";
+    $("tutup").hidden = true;
+    $("dlg").showModal();
+    if (prev) tandai(n, prev.pick, opsiAktif, true);
+  }
+
+  function tandai(n, pick, opts, again) {
+    document.querySelectorAll("#opsi button").forEach((b, k) => {
+      b.disabled = true;
+      if (opts[k].ok) b.classList.add("benar");
+      else if (k === pick) b.classList.add("salah");
+    });
+    const ok = opts[pick].ok;
+    const selesai = Object.keys(S.done).length === N;
+    const umpan = $("umpan");
+    umpan.className = "umpan " + (ok ? "ok" : "no");
+    umpan.innerHTML = ok
+      ? `🎉 <b>Benar!</b> &nbsp;${Q[n][2]}`
+      : `😵 <b>Salah.</b> Jawaban benar: <b>${Q[n][1][0]}</b>. ${Q[n][2]}`;
+    const t = $("tutup");
+    t.textContent = selesai ? "Lihat hasil akhir" : "Tutup & pilih kartu lain";
+    t.hidden = false;
+    if (!again) t.focus();
+  }
+
+  function jawab(i) {
+    if (aktif < 0 || S.done[aktif]) return;
+    const n = aktif, opts = opsiAktif;
+    const ok = opts[i].ok;
+    S.done[n] = { pick: i, ok, opts };
+    if (ok) { S.score++; S.streak++; S.best = Math.max(S.best, S.streak); confetti() } else S.streak = 0;
+    tandai(n, i, opts);
+    statistik(); papan();
+  }
+
+  function finish() {
+    const s = S.score;
+    const nilai = s * 9 + 10;
+    quizActive = false;
+    $("endt").textContent = s >= 9 ? "Luar biasa, " + S.n + "! 🏆" : s >= 6 ? "Bagus, " + S.n + "! 👏" : "Tetap semangat, " + S.n + "! 💪";
+    $("en").textContent = nilai;
+    $("ed").innerHTML = `Benar <b>${s}</b> dari ${N} soal.<br>Nilai kamu <b>${nilai}</b>. Rekor beruntun ${S.best} soal.<br>No. presensi ${S.a}.`;
+    if (!cheatBlocked) updateParticipant(S.id, { status: "finished", final_score: nilai });
+    show("end");
+    if (s >= 6) for (let i = 0; i < 3; i++) setTimeout(confetti, i * 400);
+  }
+
+  /* ===== event ===== */
+  $("start").onclick = async () => {
+    const n = $("nm").value.trim(), a = $("ab").value.trim();
+    ["nm", "ab"].forEach(i => $(i).classList.remove("err"));
+    if (n.length < 2) { return bad("nm", "Nama belum diisi. Ketik nama lengkapmu.") }
+    if (!/^\d{1,3}$/.test(a)) { return bad("ab", "No. presensi harus angka, contoh: 12.") }
+    initState();
+    urut = [...Array(N).keys()];
+    S.n = n; S.a = a;
+    $("totalSkor").textContent = N;
+    $("who").textContent = "👋 " + n + " · No. " + a;
+    S.id = await insertParticipant(n, a);
+    activeParticipantId = S.id;
+    activeParticipantName = n;
+    quizActive = true;
+    cheatBlocked = false;
+    hideCheatWarning();
+    subscribeParticipantStatus();
+    papan(); statistik(); show("app")
+  };
+
+  ["nm", "ab"].forEach(i => $(i).addEventListener("keydown", e => { if (e.key === "Enter") $("start").click() }));
+
+  function bad(id, m) {
+    $("lm").textContent = m;
+    const e = $(id);
+    e.classList.add("err");
+    void e.offsetWidth;
+    e.focus();
+    e.addEventListener("input", () => e.classList.remove("err"), { once: true });
+  }
+
+  $("grid").addEventListener("click", e => { const k = e.target.closest(".kartu"); if (k && !k.disabled) buka(+k.dataset.n); });
+  $("opsi").addEventListener("click", e => { const b = e.target.closest("button"); if (b && !b.disabled) jawab(+b.dataset.i); });
+  $("tutup").addEventListener("click", () => $("dlg").close());
+  $("dlg").addEventListener("click", e => { if (e.target === $("dlg")) $("dlg").close() });
+  $("dlg").addEventListener("close", () => {
+    aktif = -1;
+    if (Object.keys(S.done).length === N) finish();
+  });
+
+  $("acak").addEventListener("click", () => {
+    for (let i = urut.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0;[urut[i], urut[j]] = [urut[j], urut[i]]; }
+    const g = $("grid"); g.classList.remove("kocok"); void g.offsetWidth; g.classList.add("kocok");
+    papan();
+  });
+
+  $("again").onclick = async () => {
+    const n = S.n, a = S.a;
+    initState(); urut = [...Array(N).keys()]; S.n = n; S.a = a;
+    teardownParticipantChannel();
+    activeParticipantId = null; activeParticipantName = null;
+    cheatBlocked = false; hideCheatWarning();
+    S.id = await insertParticipant(n, a);
+    activeParticipantId = S.id;
+    activeParticipantName = n;
+    quizActive = true;
+    subscribeParticipantStatus();
+    papan(); statistik(); show("app")
+  };
+
+  function confetti() {
+    const cs = ["#FFE600", "#00E5FF", "#FF2ED1", "#00FF66", "#FF4949"];
+    for (let i = 0; i < 36; i++) {
+      const d = document.createElement("i"); d.className = "conf";
+      d.style.left = Math.random() * 100 + "vw"; d.style.background = cs[i % 5];
+      d.style.animationDelay = Math.random() * .4 + "s"; d.style.borderRadius = i % 2 ? "50%" : "2px";
+      document.body.appendChild(d); setTimeout(() => d.remove(), 2400)
+    }
+  }
+
+  /* ===== init tampilan ===== */
+  $("totalSkor").textContent = N;
+  show("login");
+</script>
+</body>
+
+</html>
