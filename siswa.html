@@ -233,20 +233,42 @@
 
 <script>
   /* =========================================================
-     10 SOAL MATEMATIKA
+     10 SOAL KOMBINASI MATEMATIKA
      Format: [teks soal, [pilihan... jawaban benar di indeks 0], pembahasan, simbol]
+     Soal 1-5  : kombinasi biasa (stok unik)  -> C(n, r) = n! / (r! (n - r)!)
+     Soal 6-10 : kombinasi dengan pengulangan -> C(n + r - 1, r)
      ========================================================= */
   const Q = [
-    ["Berapakah hasil 3/4 + 2/3?", ["17/12", "5/7", "5/12", "11/12", "6/7"], "Samakan penyebut dulu: 3/4 = 9/12 dan 2/3 = 8/12. Jumlahnya 17/12. Penyebut tidak boleh dijumlahkan langsung.", "+"],
-    ["Berapakah 15% dari 240?", ["36", "24", "30", "40", "48"], "15% = 15/100. Maka 15/100 × 240 = 36.", "%"],
-    ["Nilai x pada persamaan 2x + 7 = 21 adalah ...", ["7", "5", "6", "14", "28"], "Kurangi kedua ruas dengan 7: 2x = 14. Bagi 2: x = 7. Jangan lupa membagi dengan koefisien x.", "x"],
-    ["Luas lingkaran berjari-jari 7 cm (π = 22/7) adalah ...", ["154 cm²", "44 cm²", "49 cm²", "308 cm²", "22 cm²"], "Luas = π × r × r = 22/7 × 7 × 7 = 154 cm². 44 itu keliling, bukan luas.", "π"],
-    ["Keliling persegi panjang dengan panjang 12 cm dan lebar 5 cm adalah ...", ["34 cm", "17 cm", "60 cm", "30 cm", "24 cm"], "Keliling = 2 × (p + l) = 2 × 17 = 34 cm. 60 adalah luasnya.", "▭"],
-    ["Hasil dari (−8) + (−5) − (−3) adalah ...", ["−10", "−16", "0", "10", "−6"], "(−8) + (−5) = −13. Mengurangi −3 sama dengan menambah 3, jadi −13 + 3 = −10.", "−"],
-    ["Hasil dari √144 + 5² adalah ...", ["37", "29", "17", "169", "60"], "√144 = 12 dan 5² = 25. Jumlahnya 37. 5² itu 5 × 5, bukan 5 × 2.", "√"],
-    ["KPK dari 12 dan 18 adalah ...", ["36", "6", "24", "72", "216"], "12 = 2² × 3 dan 18 = 2 × 3². KPK memakai pangkat terbesar: 2² × 3² = 36. 6 adalah FPB-nya.", "∞"],
-    ["Mobil menempuh 180 km dalam waktu 2,5 jam. Kecepatannya adalah ...", ["72 km/jam", "60 km/jam", "70 km/jam", "75 km/jam", "450 km/jam"], "Kecepatan = jarak ÷ waktu = 180 ÷ 2,5 = 72 km/jam. 450 muncul jika jarak dikali waktu, itu keliru.", "⏱"],
-    ["Sisi siku-siku suatu segitiga 6 cm dan 8 cm. Panjang hipotenusanya ...", ["10 cm", "14 cm", "12 cm", "7 cm", "100 cm"], "c² = 6² + 8² = 36 + 64 = 100, sehingga c = √100 = 10 cm. Jangan lupa menarik akar di akhir.", "△"]
+    ["Di kelas ada 8 murid yang ambisius (4 cowok, 4 cewek). Guru ingin mengirim tim 3 orang untuk lomba cerdas cermat. Urutan anggota tidak berpengaruh. Berapa banyak cara guru memilih tim?",
+      ["56", "336", "24", "120", "720"],
+      "Ini kombinasi biasa (urutan tak berpengaruh): C(8, 3) = 8! / (3! × 5!) = (8 × 7 × 6) / (3 × 2 × 1) = 336 / 6 = 56 cara.", "C"],
+    ["Kamu menemukan 6 jenis vitamin di apotek. Karena dompet menipis, kamu hanya boleh membeli 2 jenis vitamin. Berapa banyak pilihan kombinasi vitamin yang dapat kamu beli?",
+      ["15", "30", "12", "20", "36"],
+      "Kombinasi biasa: C(6, 2) = 6! / (2! × 4!) = (6 × 5) / (2 × 1) = 30 / 2 = 15 cara.", "C"],
+    ["Pada lembar ujian ada 10 soal. Murid wajib mengerjakan 7 soal, dan soal nomor 1 sampai 3 wajib dikerjakan. Berapa banyak pilihan soal sisa yang bisa dipilih?",
+      ["35", "21", "120", "210", "56"],
+      "Soal 1-3 sudah pasti dipakai, jadi sisa total 7 soal dan masih perlu dipilih 4 soal lagi: C(7, 4) = 7! / (4! × 3!) = (7 × 6 × 5) / (3 × 2 × 1) = 210 / 6 = 35 cara.", "C"],
+    ["Di acara reuni ada 10 orang yang datang. Setiap orang wajib bersalaman dengan semua orang lainnya tepat satu kali. Berapa total jabat tangan yang terjadi?",
+      ["45", "90", "20", "100", "55"],
+      "Satu jabat tangan = memilih 2 orang (urutan tak berpengaruh): C(10, 2) = 10! / (2! × 8!) = (10 × 9) / (2 × 1) = 90 / 2 = 45 jabat tangan.", "C"],
+    ["Terdapat 6 titik di bidang koordinat yang tidak ada tiga titik yang segaris. Berapa banyak segitiga berbeda yang dapat dibentuk dari titik-titik tersebut?",
+      ["20", "15", "120", "6", "60"],
+      "Segitiga dibentuk dari 3 titik (urutan tak berpengaruh): C(6, 3) = 6! / (3! × 3!) = (6 × 5 × 4) / (3 × 2 × 1) = 120 / 6 = 20 segitiga.", "△"],
+    ["Di toko kue ada 4 rasa donut (Cokelat, Keju, Strawberry, Matcha). Kamu ingin membeli 3 buah donut dan boleh memilih rasa yang sama berkali-kali. Berapa banyak kombinasi rasa donut yang bisa dipilih?",
+      ["20", "12", "4", "64", "35"],
+      "Kombinasi dengan pengulangan (bebas borong): C(n + r − 1, r) = C(4 + 3 − 1, 3) = C(6, 3) = (6 × 5 × 4) / (3 × 2 × 1) = 120 / 6 = 20 cara.", "○"],
+    ["Warung angkringan punya 3 menu sate (Usus, Telur Puyuh, Ampela). Temanmu beli 4 tusuk sate dengan bebas dan boleh mengambil jenis sate yang sama semuanya. Berapa banyak kombinasi pesanan?",
+      ["15", "18", "12", "81", "35"],
+      "Kombinasi dengan pengulangan: C(3 + 4 − 1, 4) = C(6, 4). Karena C(6, 4) = C(6, 2) = (6 × 5) / (2 × 1) = 30 / 2 = 15 cara.", "○"],
+    ["Tukang es krim punya 5 varian rasa dasar. Kamu ingin membeli 1 mangkuk dengan 3 scoops, dan bebas menumpuk rasa yang sama. Berapa banyak variasi susunan rasa es krim?",
+      ["35", "21", "125", "60", "56"],
+      "Kombinasi dengan pengulangan: C(5 + 3 − 1, 3) = C(7, 3) = 7! / (3! × 4!) = (7 × 6 × 5) / (3 × 2 × 1) = 210 / 6 = 35 variasi.", "○"],
+    ["Ada 3 jenis bungkus permen (Merah, Hijau, Biru) di toples. Kamu ingin mengambil 5 buah permen dengan bebas (boleh mengambil satu warna saja). Berapa banyak kombinasi pengambilan?",
+      ["21", "35", "15", "243", "56"],
+      "Kombinasi dengan pengulangan: C(3 + 5 − 1, 5) = C(7, 5). Karena C(7, 5) = C(7, 2) = (7 × 6) / (2 × 1) = 42 / 2 = 21 cara.", "○"],
+    ["Minimarket menyediakan 4 merek kopi sachet. Kamu ingin membeli 4 sachet kopi dan boleh memborong merek yang sama semua. Berapa banyak kombinasi jenis kopi yang bisa dibeli?",
+      ["35", "56", "256", "20", "70"],
+      "Kombinasi dengan pengulangan: C(4 + 4 − 1, 4) = C(7, 4). Karena C(7, 4) = C(7, 3) = (7 × 6 × 5) / (3 × 2 × 1) = 210 / 6 = 35 cara.", "○"]
   ];
   const N = Q.length;
 
