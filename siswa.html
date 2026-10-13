@@ -292,7 +292,7 @@
     if (!supabaseClient) return null;
     const { data, error } = await supabaseClient
       .from("participants")
-      .insert({ name: name, attendance_number: attendance, status: "active", final_score: null })
+      .insert({ Nama: name, Presensi: attendance, status: "active", "Score/Nilai": null })
       .select("id")
       .single();
     if (error) { console.error("Gagal insert peserta:", error); return null }
@@ -474,7 +474,7 @@
     $("endt").textContent = s >= 9 ? "Luar biasa, " + S.n + "! 🏆" : s >= 6 ? "Bagus, " + S.n + "! 👏" : "Tetap semangat, " + S.n + "! 💪";
     $("en").textContent = nilai;
     $("ed").innerHTML = `Benar <b>${s}</b> dari ${N} soal.<br>Nilai kamu <b>${nilai}</b>. Rekor beruntun ${S.best} soal.<br>No. presensi ${S.a}.`;
-    if (!cheatBlocked) updateParticipant(S.id, { status: "finished", final_score: nilai });
+    if (!cheatBlocked) updateParticipant(S.id, { status: "finished", "Score/Nilai": nilai });
     show("end");
     if (s >= 6) for (let i = 0; i < 3; i++) setTimeout(confetti, i * 400);
   }

@@ -1,665 +1,636 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Admin Ujian Matematika</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin Ujian Matematika</title>
 
-    <script>
-      if (window.tailwind) {
-        tailwind.config = {
-          theme: {
-            extend: {
-              fontFamily: {
-                mono: [
-                  "ui-monospace",
-                  "SFMono-Regular",
-                  "Menlo",
-                  "Monaco",
-                  "Consolas",
-                  "monospace",
-                ],
-              },
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              mono: [
+                "ui-monospace",
+                "SFMono-Regular",
+                "Menlo",
+                "Monaco",
+                "Consolas",
+                "monospace",
+              ],
             },
           },
-        };
-      }
-    </script>
+        },
+      };
+    }
+  </script>
 
-    <style>
-      * {
-        box-sizing: border-box;
-      }
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-      body {
-        margin: 0;
-        background: #F4F4F0;
-        color: #111;
-        font-family:
-          ui-monospace, "Space Grotesk", SFMono-Regular, Menlo, Monaco,
-          Consolas, monospace;
-      }
+    body {
+      margin: 0;
+      background: #F4F4F0;
+      color: #111;
+      font-family:
+        ui-monospace, "Space Grotesk", SFMono-Regular, Menlo, Monaco,
+        Consolas, monospace;
+    }
 
-      /* tombol taktil (dipakai juga oleh tombol dinamis di tabel) */
-      button {
-        transition:
-          transform 0.15s ease,
-          box-shadow 0.15s ease;
-      }
+    /* tombol taktil (dipakai juga oleh tombol dinamis di tabel) */
+    button {
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
 
-      button:not(:disabled):hover {
-        transform: translateY(-2px);
-      }
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+    }
 
-      button:not(:disabled):active {
-        transform: translate(4px, 4px);
-        box-shadow: 0 0 0 #000 !important;
-      }
+    button:not(:disabled):active {
+      transform: translate(4px, 4px);
+      box-shadow: 0 0 0 #000 !important;
+    }
 
-      button:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-      }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
 
-      @keyframes pulse-dot {
+    @keyframes pulse-dot {
 
-        0%,
-        100% {
-          opacity: 1;
-        }
-
-        50% {
-          opacity: 0.35;
-        }
+      0%,
+      100% {
+        opacity: 1;
       }
 
-      #connectionStatus .dot {
-        animation: pulse-dot 1.6s ease-in-out infinite;
+      50% {
+        opacity: 0.35;
       }
-    </style>
-  </head>
+    }
 
-  <body class="min-h-screen">
-    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <header
-        class="mb-6 rounded-2xl border-4 border-black bg-[#FFE600] p-5 shadow-[8px_8px_0px_0px_#000] sm:p-7"
-      >
-        <div
-          class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"
-        >
-          <div>
-            <p
-              class="mb-2 inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase tracking-widest text-white"
-            >
-              Sistem Monitoring
-            </p>
+    #connectionStatus .dot {
+      animation: pulse-dot 1.6s ease-in-out infinite;
+    }
+  </style>
+</head>
 
-            <h1 class="text-3xl font-black leading-tight sm:text-5xl">
-              DASHBOARD ADMIN 👑
-            </h1>
+<body class="min-h-screen">
+  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <header class="mb-6 rounded-2xl border-4 border-black bg-[#FFE600] p-5 shadow-[8px_8px_0px_0px_#000] sm:p-7">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p
+            class="mb-2 inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase tracking-widest text-white">
+            Sistem Monitoring
+          </p>
 
-            <p class="mt-3 max-w-2xl text-sm font-bold sm:text-base">
-              Pantau peserta ujian matematika secara real-time dan kelola status
-              peserta dengan cepat.
-            </p>
-          </div>
+          <h1 class="text-3xl font-black leading-tight sm:text-5xl">
+            DASHBOARD ADMIN 👑
+          </h1>
 
-          <button
-            id="refreshButton"
-            type="button"
-            class="rounded-xl border-4 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black shadow-[4px_4px_0px_0px_#000] transition-all hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none"
-          >
-            Refresh Data 🔄
-          </button>
+          <p class="mt-3 max-w-2xl text-sm font-bold sm:text-base">
+            Pantau peserta ujian matematika secara real-time dan kelola status
+            peserta dengan cepat.
+          </p>
         </div>
 
-        <div class="mt-5 flex flex-wrap items-center gap-3 text-xs font-black">
-          <span
-            id="connectionStatus"
-            class="inline-flex items-center gap-2 rounded-full border-4 border-black bg-white px-3 py-2"
-          >
-            <span class="dot h-3 w-3 rounded-full border-2 border-black bg-gray-400"></span>
-            Realtime belum tersambung
-          </span>
+        <button id="refreshButton" type="button"
+          class="rounded-xl border-4 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black shadow-[4px_4px_0px_0px_#000] transition-all hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none">
+          Refresh Data 🔄
+        </button>
+      </div>
 
-          <span
-            id="lastUpdated"
-            class="rounded-full border-4 border-black bg-white px-3 py-2"
-          >
-            Terakhir diperbarui: -
-          </span>
-        </div>
-      </header>
+      <div class="mt-5 flex flex-wrap items-center gap-3 text-xs font-black">
+        <span id="connectionStatus"
+          class="inline-flex items-center gap-2 rounded-full border-4 border-black bg-white px-3 py-2">
+          <span class="dot h-3 w-3 rounded-full border-2 border-black bg-gray-400"></span>
+          Realtime belum tersambung
+        </span>
 
-      <!-- Configuration Alert -->
-      <section
-        id="configurationAlert"
-        class="mb-6 hidden rounded-2xl border-4 border-black bg-[#FF9F5A] p-4 font-bold shadow-[6px_6px_0px_0px_#000]"
-      >
-        <p class="font-black">Konfigurasi Supabase belum diisi.</p>
-        <p class="mt-1 text-sm">
-          Isi nilai SUPABASE_URL dan SUPABASE_ANON_KEY di dalam bagian
-          JavaScript sebelum digunakan.
+        <span id="lastUpdated" class="rounded-full border-4 border-black bg-white px-3 py-2">
+          Terakhir diperbarui: -
+        </span>
+      </div>
+    </header>
+
+    <!-- Configuration Alert -->
+    <section id="configurationAlert"
+      class="mb-6 hidden rounded-2xl border-4 border-black bg-[#FF9F5A] p-4 font-bold shadow-[6px_6px_0px_0px_#000]">
+      <p class="font-black">Konfigurasi Supabase belum diisi.</p>
+      <p class="mt-1 text-sm">
+        Isi nilai SUPABASE_URL dan SUPABASE_ANON_KEY di dalam bagian
+        JavaScript sebelum digunakan.
+      </p>
+    </section>
+
+    <!-- Error Alert -->
+    <section id="errorAlert"
+      class="mb-6 hidden rounded-2xl border-4 border-black bg-[#FF4949] p-4 font-bold text-white shadow-[6px_6px_0px_0px_#000]">
+      <p id="errorMessage"></p>
+    </section>
+
+    <!-- Statistic Cards -->
+    <section class="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+      <article class="rounded-2xl border-4 border-black bg-white p-5 shadow-[6px_6px_0px_0px_#000]">
+        <p
+          class="inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase text-white">
+          Total Peserta
         </p>
-      </section>
+        <p id="totalParticipants" class="mt-3 text-5xl font-black">0</p>
+        <p class="mt-2 text-xs font-bold text-gray-600">
+          Seluruh peserta terdaftar
+        </p>
+      </article>
 
-      <!-- Error Alert -->
-      <section
-        id="errorAlert"
-        class="mb-6 hidden rounded-2xl border-4 border-black bg-[#FF4949] p-4 font-bold text-white shadow-[6px_6px_0px_0px_#000]"
-      >
-        <p id="errorMessage"></p>
-      </section>
+      <article class="rounded-2xl border-4 border-black bg-[#00FF66] p-5 shadow-[6px_6px_0px_0px_#000]">
+        <p
+          class="inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase text-white">
+          Peserta Aktif
+        </p>
+        <p id="activeParticipants" class="mt-3 text-5xl font-black">0</p>
+        <p class="mt-2 text-xs font-bold">
+          Sedang mengerjakan ujian
+        </p>
+      </article>
 
-      <!-- Statistic Cards -->
-      <section class="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
-        <article
-          class="rounded-2xl border-4 border-black bg-white p-5 shadow-[6px_6px_0px_0px_#000]"
-        >
-          <p
-            class="inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase text-white"
-          >
-            Total Peserta
-          </p>
-          <p id="totalParticipants" class="mt-3 text-5xl font-black">0</p>
-          <p class="mt-2 text-xs font-bold text-gray-600">
-            Seluruh peserta terdaftar
-          </p>
-        </article>
+      <article class="rounded-2xl border-4 border-black bg-[#FF4949] p-5 shadow-[6px_6px_0px_0px_#000]">
+        <p
+          class="inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase text-white">
+          Peserta Diblokir
+        </p>
+        <p id="blockedParticipants" class="mt-3 text-5xl font-black text-white">
+          0
+        </p>
+        <p class="mt-2 text-xs font-bold text-white">
+          Ketahuan pindah tab
+        </p>
+      </article>
+    </section>
 
-        <article
-          class="rounded-2xl border-4 border-black bg-[#00FF66] p-5 shadow-[6px_6px_0px_0px_#000]"
-        >
-          <p
-            class="inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase text-white"
-          >
-            Peserta Aktif
+    <!-- Table Card -->
+    <section class="overflow-hidden rounded-2xl border-4 border-black bg-white shadow-[8px_8px_0px_0px_#000]">
+      <div
+        class="flex flex-col gap-3 border-b-4 border-black bg-[#00E5FF] p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-black">Monitoring Peserta</h2>
+          <p class="mt-1 text-sm font-bold">
+            Data diperbarui otomatis saat terjadi perubahan.
           </p>
-          <p id="activeParticipants" class="mt-3 text-5xl font-black">0</p>
-          <p class="mt-2 text-xs font-bold">
-            Sedang mengerjakan ujian
-          </p>
-        </article>
-
-        <article
-          class="rounded-2xl border-4 border-black bg-[#FF4949] p-5 shadow-[6px_6px_0px_0px_#000]"
-        >
-          <p
-            class="inline-block rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-black uppercase text-white"
-          >
-            Peserta Diblokir
-          </p>
-          <p id="blockedParticipants" class="mt-3 text-5xl font-black text-white">
-            0
-          </p>
-          <p class="mt-2 text-xs font-bold text-white">
-            Ketahuan pindah tab
-          </p>
-        </article>
-      </section>
-
-      <!-- Table Card -->
-      <section
-        class="overflow-hidden rounded-2xl border-4 border-black bg-white shadow-[8px_8px_0px_0px_#000]"
-      >
-        <div
-          class="flex flex-col gap-3 border-b-4 border-black bg-[#00E5FF] p-5 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div>
-            <h2 class="text-xl font-black">Monitoring Peserta</h2>
-            <p class="mt-1 text-sm font-bold">
-              Data diperbarui otomatis saat terjadi perubahan.
-            </p>
-          </div>
-
-          <span
-            id="participantCount"
-            class="w-fit rounded-full border-4 border-black bg-white px-3 py-2 text-xs font-black"
-          >
-            0 peserta
-          </span>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="min-w-full border-collapse">
-            <thead>
-              <tr class="border-b-4 border-black bg-black text-left text-xs uppercase text-white">
-                <th class="whitespace-nowrap px-4 py-4 font-black">
-                  Nama & Nomor Presensi
-                </th>
-                <th class="whitespace-nowrap px-4 py-4 font-black">Status</th>
-                <th class="whitespace-nowrap px-4 py-4 font-black">
-                  Skor Akhir
-                </th>
-                <th class="whitespace-nowrap px-4 py-4 text-center font-black">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
+        <span id="participantCount"
+          class="w-fit rounded-full border-4 border-black bg-white px-3 py-2 text-xs font-black">
+          0 peserta
+        </span>
+      </div>
 
-            <tbody id="participantsTableBody">
-              <tr>
-                <td colspan="4" class="px-4 py-10 text-center font-black">
-                  Memuat data peserta...
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse">
+          <thead>
+            <tr class="border-b-4 border-black bg-black text-left text-xs uppercase text-white">
+              <th class="whitespace-nowrap px-4 py-4 font-black">
+                Nama & Nomor Presensi
+              </th>
+              <th class="whitespace-nowrap px-4 py-4 font-black">Status</th>
+              <th class="whitespace-nowrap px-4 py-4 font-black">
+                Skor Akhir
+              </th>
+              <th class="whitespace-nowrap px-4 py-4 text-center font-black">
+                Aksi
+              </th>
+            </tr>
+          </thead>
 
-      <footer class="mt-6 text-center text-xs font-bold text-gray-600">
-        Dashboard Admin Ujian Matematika
-      </footer>
-    </main>
+          <tbody id="participantsTableBody">
+            <tr>
+              <td colspan="4" class="px-4 py-10 text-center font-black">
+                Memuat data peserta...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <script>
-      /*
-      SESUAIKAN NAMA KOLOM JIKA STRUKTUR TABEL BERBEDA:
-      id
-      name
-      attendance_number
-      status
-      final_score
-      created_at
-    */
+    <footer class="mt-6 text-center text-xs font-bold text-gray-600">
+      Dashboard Admin Ujian Matematika
+    </footer>
+  </main>
 
-      const SUPABASE_URL = "https://trbljscjcinduiwzaord.supabase.co";
-      const SUPABASE_ANON_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyYmxqc2NqY2luZHVpd3phb3JkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MDMzODQsImV4cCI6MjEwNzM3OTM4NH0.Ark6HpYsQPU6q9AHjLmrHZ-GEXMELXxVuGUe_1T1Aw4";
+  <script>
+    /*
+    SESUAIKAN NAMA KOLOM JIKA STRUKTUR TABEL BERBEDA:
+    id
+    Nama
+    Presensi
+    status
+    Score/Nilai
+    created_at
+  */
 
-      let supabaseClient = null;
-      let realtimeChannel = null;
-      let participants = [];
-      let isFetching = false;
-      let isConfigured = false;
+    const SUPABASE_URL = "https://trbljscjcinduiwzaord.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyYmxqc2NqY2luZHVpd3phb3JkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MDMzODQsImV4cCI6MjEwNzM3OTM4NH0.Ark6HpYsQPU6q9AHjLmrHZ-GEXMELXxVuGUe_1T1Aw4";
 
-      const elements = {
-        refreshButton: document.getElementById("refreshButton"),
-        configurationAlert: document.getElementById("configurationAlert"),
-        errorAlert: document.getElementById("errorAlert"),
-        errorMessage: document.getElementById("errorMessage"),
-        tableBody: document.getElementById("participantsTableBody"),
-        totalParticipants: document.getElementById("totalParticipants"),
-        activeParticipants: document.getElementById("activeParticipants"),
-        blockedParticipants: document.getElementById("blockedParticipants"),
-        participantCount: document.getElementById("participantCount"),
-        connectionStatus: document.getElementById("connectionStatus"),
-        lastUpdated: document.getElementById("lastUpdated"),
+    let supabaseClient = null;
+    let realtimeChannel = null;
+    let participants = [];
+    let isFetching = false;
+    let isConfigured = false;
+
+    const elements = {
+      refreshButton: document.getElementById("refreshButton"),
+      configurationAlert: document.getElementById("configurationAlert"),
+      errorAlert: document.getElementById("errorAlert"),
+      errorMessage: document.getElementById("errorMessage"),
+      tableBody: document.getElementById("participantsTableBody"),
+      totalParticipants: document.getElementById("totalParticipants"),
+      activeParticipants: document.getElementById("activeParticipants"),
+      blockedParticipants: document.getElementById("blockedParticipants"),
+      participantCount: document.getElementById("participantCount"),
+      connectionStatus: document.getElementById("connectionStatus"),
+      lastUpdated: document.getElementById("lastUpdated"),
+    };
+
+    function isSupabaseConfigured() {
+      return (
+        SUPABASE_URL &&
+        SUPABASE_ANON_KEY &&
+        !SUPABASE_URL.includes("MASUKKAN_") &&
+        !SUPABASE_ANON_KEY.includes("MASUKKAN_")
+      );
+    }
+
+    function setConnectionStatus(text, colorClass) {
+      elements.connectionStatus.replaceChildren();
+
+      const dot = document.createElement("span");
+      dot.className = `dot h-3 w-3 rounded-full border-2 border-black ${colorClass}`;
+
+      const label = document.createElement("span");
+      label.textContent = text;
+
+      elements.connectionStatus.append(dot, label);
+    }
+
+    function showError(message) {
+      elements.errorMessage.textContent = message;
+      elements.errorAlert.classList.remove("hidden");
+    }
+
+    function hideError() {
+      elements.errorAlert.classList.add("hidden");
+      elements.errorMessage.textContent = "";
+    }
+
+    function setLoading(isLoading) {
+      elements.refreshButton.disabled = isLoading;
+      elements.refreshButton.textContent = isLoading
+        ? "Memuat Data..."
+        : "Refresh Data 🔄";
+    }
+
+    function normalizeStatus(status) {
+      const normalized = String(status || "")
+        .toLowerCase()
+        .trim();
+
+      if (normalized === "active") return "active";
+      if (normalized === "blocked") return "blocked";
+      if (normalized === "finished") return "finished";
+
+      return "unknown";
+    }
+
+    function getStatusLabel(status) {
+      const labels = {
+        active: "Active",
+        blocked: "Blocked",
+        finished: "Finished",
+        unknown: "Tidak Diketahui",
       };
 
-      function isSupabaseConfigured() {
-        return (
-          SUPABASE_URL &&
-          SUPABASE_ANON_KEY &&
-          !SUPABASE_URL.includes("MASUKKAN_") &&
-          !SUPABASE_ANON_KEY.includes("MASUKKAN_")
-        );
+      return labels[status] || labels.unknown;
+    }
+
+    function getStatusClass(status) {
+      const classes = {
+        active: "bg-[#00FF66] text-black",
+        blocked: "bg-[#FF4949] text-white",
+        finished: "bg-gray-300 text-black",
+        unknown: "bg-[#FFE600] text-black",
+      };
+
+      return classes[status] || classes.unknown;
+    }
+
+    function formatScore(score) {
+      if (score === null || score === undefined || score === "") {
+        return "-";
       }
 
-      function setConnectionStatus(text, colorClass) {
-        elements.connectionStatus.replaceChildren();
+      const numericScore = Number(score);
 
-        const dot = document.createElement("span");
-        dot.className = `dot h-3 w-3 rounded-full border-2 border-black ${colorClass}`;
-
-        const label = document.createElement("span");
-        label.textContent = text;
-
-        elements.connectionStatus.append(dot, label);
+      if (Number.isNaN(numericScore)) {
+        return String(score);
       }
 
-      function showError(message) {
-        elements.errorMessage.textContent = message;
-        elements.errorAlert.classList.remove("hidden");
-      }
+      return Number.isInteger(numericScore)
+        ? String(numericScore)
+        : numericScore.toFixed(2);
+    }
 
-      function hideError() {
-        elements.errorAlert.classList.add("hidden");
-        elements.errorMessage.textContent = "";
-      }
+    function formatUpdatedTime(date = new Date()) {
+      return new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "medium",
+      }).format(date);
+    }
 
-      function setLoading(isLoading) {
-        elements.refreshButton.disabled = isLoading;
-        elements.refreshButton.textContent = isLoading
-          ? "Memuat Data..."
-          : "Refresh Data 🔄";
-      }
+    function createCell(className = "") {
+      const cell = document.createElement("td");
+      cell.className = className;
+      return cell;
+    }
 
-      function normalizeStatus(status) {
-        const normalized = String(status || "")
-          .toLowerCase()
-          .trim();
+    function createStatusBadge(status) {
+      const badge = document.createElement("span");
+      badge.className = [
+        "inline-flex",
+        "items-center",
+        "rounded-full",
+        "border-[3px]",
+        "border-black",
+        "px-3",
+        "py-1",
+        "text-xs",
+        "font-black",
+        "shadow-[2px_2px_0px_0px_#000]",
+        getStatusClass(status),
+      ].join(" ");
 
-        if (normalized === "active") return "active";
-        if (normalized === "blocked") return "blocked";
-        if (normalized === "finished") return "finished";
+      badge.textContent = getStatusLabel(status);
+      return badge;
+    }
 
-        return "unknown";
-      }
+    function createUnblockButton(participant) {
+      const button = document.createElement("button");
 
-      function getStatusLabel(status) {
-        const labels = {
-          active: "Active",
-          blocked: "Blocked",
-          finished: "Finished",
-          unknown: "Tidak Diketahui",
-        };
+      button.type = "button";
+      button.className = [
+        "rounded-lg",
+        "border-[3px]",
+        "border-black",
+        "bg-[#FFE600]",
+        "px-3",
+        "py-2",
+        "text-xs",
+        "font-black",
+        "shadow-[3px_3px_0px_0px_#000]",
+        "transition-all",
+        "hover:-translate-y-0.5",
+        "active:translate-x-1",
+        "active:translate-y-1",
+        "active:shadow-none",
+      ].join(" ");
 
-        return labels[status] || labels.unknown;
-      }
+      button.textContent = "Unblock 🔓";
 
-      function getStatusClass(status) {
-        const classes = {
-          active: "bg-[#00FF66] text-black",
-          blocked: "bg-[#FF4949] text-white",
-          finished: "bg-gray-300 text-black",
-          unknown: "bg-[#FFE600] text-black",
-        };
+      button.addEventListener("click", () => {
+        unblockUser(participant.id, button);
+      });
 
-        return classes[status] || classes.unknown;
-      }
+      return button;
+    }
 
-      function formatScore(score) {
-        if (score === null || score === undefined || score === "") {
-          return "-";
-        }
+    function renderStatistics() {
+      const total = participants.length;
+      const active = participants.filter(
+        (participant) => normalizeStatus(participant.status) === "active",
+      ).length;
+      const blocked = participants.filter(
+        (participant) => normalizeStatus(participant.status) === "blocked",
+      ).length;
 
-        const numericScore = Number(score);
+      elements.totalParticipants.textContent = total;
+      elements.activeParticipants.textContent = active;
+      elements.blockedParticipants.textContent = blocked;
+      elements.participantCount.textContent = `${total} peserta`;
+    }
 
-        if (Number.isNaN(numericScore)) {
-          return String(score);
-        }
+    function renderTable() {
+      elements.tableBody.replaceChildren();
 
-        return Number.isInteger(numericScore)
-          ? String(numericScore)
-          : numericScore.toFixed(2);
-      }
-
-      function formatUpdatedTime(date = new Date()) {
-        return new Intl.DateTimeFormat("id-ID", {
-          dateStyle: "medium",
-          timeStyle: "medium",
-        }).format(date);
-      }
-
-      function createCell(className = "") {
-        const cell = document.createElement("td");
-        cell.className = className;
-        return cell;
-      }
-
-      function createStatusBadge(status) {
-        const badge = document.createElement("span");
-        badge.className = [
-          "inline-flex",
-          "items-center",
-          "rounded-full",
-          "border-[3px]",
-          "border-black",
-          "px-3",
-          "py-1",
-          "text-xs",
-          "font-black",
-          "shadow-[2px_2px_0px_0px_#000]",
-          getStatusClass(status),
-        ].join(" ");
-
-        badge.textContent = getStatusLabel(status);
-        return badge;
-      }
-
-      function createUnblockButton(participant) {
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = [
-          "rounded-lg",
-          "border-[3px]",
-          "border-black",
-          "bg-[#FFE600]",
-          "px-3",
-          "py-2",
-          "text-xs",
-          "font-black",
-          "shadow-[3px_3px_0px_0px_#000]",
-          "transition-all",
-          "hover:-translate-y-0.5",
-          "active:translate-x-1",
-          "active:translate-y-1",
-          "active:shadow-none",
-        ].join(" ");
-
-        button.textContent = "Unblock 🔓";
-
-        button.addEventListener("click", () => {
-          unblockUser(participant.id, button);
-        });
-
-        return button;
-      }
-
-      function renderStatistics() {
-        const total = participants.length;
-        const active = participants.filter(
-          (participant) => normalizeStatus(participant.status) === "active",
-        ).length;
-        const blocked = participants.filter(
-          (participant) => normalizeStatus(participant.status) === "blocked",
-        ).length;
-
-        elements.totalParticipants.textContent = total;
-        elements.activeParticipants.textContent = active;
-        elements.blockedParticipants.textContent = blocked;
-        elements.participantCount.textContent = `${total} peserta`;
-      }
-
-      function renderTable() {
-        elements.tableBody.replaceChildren();
-
-        if (!participants.length) {
-          const row = document.createElement("tr");
-          const cell = createCell(
-            "px-4 py-10 text-center font-black text-gray-600",
-          );
-
-          cell.colSpan = 4;
-          cell.textContent = "Belum ada data peserta.";
-          row.appendChild(cell);
-          elements.tableBody.appendChild(row);
-          return;
-        }
-
-        participants.forEach((participant) => {
-          const row = document.createElement("tr");
-
-          row.className =
-            "border-b-2 border-black transition-colors last:border-b-0 hover:bg-[#FFF9BF]";
-
-          const identityCell = createCell("px-4 py-4");
-          const identityWrapper = document.createElement("div");
-          identityWrapper.className = "min-w-[180px]";
-
-          const name = document.createElement("p");
-          name.className = "font-black";
-          name.textContent = participant.name || "Nama tidak tersedia";
-
-          const attendance = document.createElement("p");
-          attendance.className = "mt-1 text-xs font-bold text-gray-600";
-          attendance.textContent = `Nomor Presensi: ${participant.attendance_number ?? "-"}`;
-
-          identityWrapper.append(name, attendance);
-          identityCell.appendChild(identityWrapper);
-
-          const statusCell = createCell("px-4 py-4");
-          const normalizedStatus = normalizeStatus(participant.status);
-          statusCell.appendChild(createStatusBadge(normalizedStatus));
-
-          const scoreCell = createCell("px-4 py-4");
-          scoreCell.classList.add("font-black");
-          scoreCell.textContent = formatScore(participant.final_score);
-
-          const actionCell = createCell("px-4 py-4 text-center");
-
-          if (normalizedStatus === "blocked") {
-            actionCell.appendChild(createUnblockButton(participant));
-          } else {
-            const dash = document.createElement("span");
-            dash.className = "font-black";
-            dash.textContent = "-";
-            actionCell.appendChild(dash);
-          }
-
-          row.append(identityCell, statusCell, scoreCell, actionCell);
-          elements.tableBody.appendChild(row);
-        });
-      }
-
-      function renderParticipants() {
-        renderStatistics();
-        renderTable();
-      }
-
-      async function fetchParticipants() {
-        if (!isConfigured || !supabaseClient) {
-          return;
-        }
-
-        if (isFetching) {
-          return;
-        }
-
-        isFetching = true;
-        setLoading(true);
-        hideError();
-
-        try {
-          const { data, error } = await supabaseClient
-            .from("participants")
-            .select(
-              "id, name, attendance_number, status, final_score, created_at",
-            )
-            .order("created_at", { ascending: false });
-
-          if (error) {
-            throw error;
-          }
-
-          participants = Array.isArray(data) ? data : [];
-          renderParticipants();
-
-          elements.lastUpdated.textContent = `Terakhir diperbarui: ${formatUpdatedTime()}`;
-        } catch (error) {
-          console.error("Gagal mengambil data peserta:", error);
-
-          showError(
-            "Data peserta gagal dimuat. Periksa koneksi Supabase dan struktur tabel participants.",
-          );
-
-          participants = [];
-          renderParticipants();
-        } finally {
-          isFetching = false;
-          setLoading(false);
-        }
-      }
-
-      async function unblockUser(id, button) {
-        if (!id || !supabaseClient) {
-          return;
-        }
-
-        const confirmed = window.confirm(
-          "Apakah Anda yakin ingin membuka blokir peserta ini?",
+      if (!participants.length) {
+        const row = document.createElement("tr");
+        const cell = createCell(
+          "px-4 py-10 text-center font-black text-gray-600",
         );
 
-        if (!confirmed) {
-          return;
-        }
-
-        button.disabled = true;
-        button.textContent = "Memproses...";
-
-        try {
-          const { error } = await supabaseClient
-            .from("participants")
-            .update({ status: "active" })
-            .eq("id", id);
-
-          if (error) {
-            throw error;
-          }
-
-          await fetchParticipants();
-        } catch (error) {
-          console.error("Gagal membuka blokir peserta:", error);
-
-          showError(
-            "Peserta gagal di-unblock. Pastikan izin update Supabase sudah benar.",
-          );
-
-          button.disabled = false;
-          button.textContent = "Unblock 🔓";
-        }
+        cell.colSpan = 4;
+        cell.textContent = "Belum ada data peserta.";
+        row.appendChild(cell);
+        elements.tableBody.appendChild(row);
+        return;
       }
 
-      function subscribeToRealtime() {
-        if (!supabaseClient || realtimeChannel) {
-          return;
+      participants.forEach((participant) => {
+        const row = document.createElement("tr");
+
+        row.className =
+          "border-b-2 border-black transition-colors last:border-b-0 hover:bg-[#FFF9BF]";
+
+        const identityCell = createCell("px-4 py-4");
+        const identityWrapper = document.createElement("div");
+        identityWrapper.className = "min-w-[180px]";
+
+        const name = document.createElement("p");
+        name.className = "font-black";
+        name.textContent = participant.Nama || "Nama tidak tersedia";
+
+        const attendance = document.createElement("p");
+        attendance.className = "mt-1 text-xs font-bold text-gray-600";
+        attendance.textContent = `Nomor Presensi: ${participant.Presensi ?? "-"}`;
+
+        identityWrapper.append(name, attendance);
+        identityCell.appendChild(identityWrapper);
+
+        const statusCell = createCell("px-4 py-4");
+        const normalizedStatus = normalizeStatus(participant.status);
+        statusCell.appendChild(createStatusBadge(normalizedStatus));
+
+        const scoreCell = createCell("px-4 py-4");
+        scoreCell.classList.add("font-black");
+        scoreCell.textContent = formatScore(participant["Score/Nilai"]);
+
+        const actionCell = createCell("px-4 py-4 text-center");
+
+        if (normalizedStatus === "blocked") {
+          actionCell.appendChild(createUnblockButton(participant));
+        } else {
+          const dash = document.createElement("span");
+          dash.className = "font-black";
+          dash.textContent = "-";
+          actionCell.appendChild(dash);
         }
 
-        realtimeChannel = supabaseClient
-          .channel("participants-realtime")
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "participants",
-            },
-            () => {
-              fetchParticipants();
-            },
+        row.append(identityCell, statusCell, scoreCell, actionCell);
+        elements.tableBody.appendChild(row);
+      });
+    }
+
+    function renderParticipants() {
+      renderStatistics();
+      renderTable();
+    }
+
+    async function fetchParticipants() {
+      if (!isConfigured || !supabaseClient) {
+        return;
+      }
+
+      if (isFetching) {
+        return;
+      }
+
+      isFetching = true;
+      setLoading(true);
+      hideError();
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("participants")
+          .select(
+            'id, Nama, Presensi, status, "Score/Nilai", created_at',
           )
-          .subscribe((status) => {
-            if (status === "SUBSCRIBED") {
-              setConnectionStatus("Realtime tersambung", "bg-green-400");
-            } else if (status === "CHANNEL_ERROR") {
-              setConnectionStatus("Realtime mengalami error", "bg-red-400");
-            } else if (status === "TIMED_OUT") {
-              setConnectionStatus("Realtime timeout", "bg-orange-400");
-            } else {
-              setConnectionStatus(`Realtime: ${status}`, "bg-yellow-300");
-            }
-          });
-      }
+          .order("created_at", { ascending: false });
 
-      function initializeApp() {
-        isConfigured = isSupabaseConfigured();
-
-        if (!isConfigured) {
-          elements.configurationAlert.classList.remove("hidden");
-          setConnectionStatus("Konfigurasi belum diisi", "bg-orange-400");
-          renderParticipants();
-          return;
+        if (error) {
+          throw error;
         }
 
-        supabaseClient = window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY,
+        participants = Array.isArray(data) ? data : [];
+        renderParticipants();
+
+        elements.lastUpdated.textContent = `Terakhir diperbarui: ${formatUpdatedTime()}`;
+      } catch (error) {
+        console.error("Gagal mengambil data peserta:", error);
+
+        showError(
+          "Data peserta gagal dimuat. Periksa koneksi Supabase dan struktur tabel participants.",
         );
 
-        elements.refreshButton.addEventListener("click", fetchParticipants);
+        participants = [];
+        renderParticipants();
+      } finally {
+        isFetching = false;
+        setLoading(false);
+      }
+    }
 
-        fetchParticipants();
-        subscribeToRealtime();
+    async function unblockUser(id, button) {
+      if (!id || !supabaseClient) {
+        return;
       }
 
-      document.addEventListener("DOMContentLoaded", initializeApp);
-    </script>
-  </body>
+      const confirmed = window.confirm(
+        "Apakah Anda yakin ingin membuka blokir peserta ini?",
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Memproses...";
+
+      try {
+        const { error } = await supabaseClient
+          .from("participants")
+          .update({ status: "active" })
+          .eq("id", id);
+
+        if (error) {
+          throw error;
+        }
+
+        await fetchParticipants();
+      } catch (error) {
+        console.error("Gagal membuka blokir peserta:", error);
+
+        showError(
+          "Peserta gagal di-unblock. Pastikan izin update Supabase sudah benar.",
+        );
+
+        button.disabled = false;
+        button.textContent = "Unblock 🔓";
+      }
+    }
+
+    function subscribeToRealtime() {
+      if (!supabaseClient || realtimeChannel) {
+        return;
+      }
+
+      realtimeChannel = supabaseClient
+        .channel("participants-realtime")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "participants",
+          },
+          () => {
+            fetchParticipants();
+          },
+        )
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
+            setConnectionStatus("Realtime tersambung", "bg-green-400");
+          } else if (status === "CHANNEL_ERROR") {
+            setConnectionStatus("Realtime mengalami error", "bg-red-400");
+          } else if (status === "TIMED_OUT") {
+            setConnectionStatus("Realtime timeout", "bg-orange-400");
+          } else {
+            setConnectionStatus(`Realtime: ${status}`, "bg-yellow-300");
+          }
+        });
+    }
+
+    function initializeApp() {
+      isConfigured = isSupabaseConfigured();
+
+      if (!isConfigured) {
+        elements.configurationAlert.classList.remove("hidden");
+        setConnectionStatus("Konfigurasi belum diisi", "bg-orange-400");
+        renderParticipants();
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+
+      elements.refreshButton.addEventListener("click", fetchParticipants);
+
+      fetchParticipants();
+      subscribeToRealtime();
+    }
+
+    document.addEventListener("DOMContentLoaded", initializeApp);
+  </script>
+</body>
+
 </html>
