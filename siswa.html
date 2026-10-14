@@ -376,6 +376,61 @@
   let quizActive = false;
   let cheatBlocked = false;
 
+  /* ===== Anti-cheat tambahan: fokus jendela & mode layar penuh ===== */
+  let fsGraceUntil = 0;       // grace period agar transisi fullscreen tidak dianggap curang
+  let focusIntervalId = null; // pemantau fokus halaman (menangkap panel AI/ jendela lain)
+  let suppressBlurCheck = false; // jeda sesaat saat kita sendiri yang mengubah fullscreen
+
+  /* beri jeda singkat agar perubahan fullscreen tidak memicu blokir*/
+  function grantFocusGrace(ms) {
+    fsGraceUntil = Date.now() + (ms || 1200);
+  }
+
+  function focusGraceActive() {
+    return Date.now() < fsGraceUntil;
+  }
+
+  function isFullscreen() {
+    return !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement
+    );
+  }
+
+  /* masuk mode layar penuh (dipanggil dari gesture klik tombol Mulai/Ulangi) */
+  async function requestFullscreenLock() {
+    const el = document.documentElement;
+    if (isFullscreen() || !el) return;
+    suppressBlurCheck = true;
+    grantFocusGrace(1500);
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen({ navigationUI: "hide" });
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    } catch (err) {
+      console.warn("Fullscreen ditolak browser:", err);
+    } finally {
+      setTimeout(() => { suppressBlurCheck = false; }, 1500);
+    }
+  }
+
+  /* keluar mode layar penuh dengan aman (tanpa memicu blokir) */
+  function exitFullscreenLock() {
+    if (!isFullscreen()) return;
+    suppressBlurCheck = true;
+    grantFocusGrace(1200);
+    try {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+    } catch (err) {
+      console.warn("Gagal keluar fullscreen:", err);
+    } finally {
+      setTimeout(() => { suppressBlurCheck = false; }, 1200);
+    }
+  }
+
   /* ubah kolom status peserta di tabel participants (real-time) */
   async function updateParticipantStatus(status) {
     if (!activeParticipantId) return false;
@@ -384,7 +439,7 @@
 
   function showCheatWarning(reason) {
     cheatBlocked = true;
-    const sebab = reason || "Kamu terdeteksi <b>berpindah tab</b> atau <b>meminimalkan browser</b> saat mengerjakan ujian.";
+    const sebab = reason || "Kamu terdeteksi <b>berpindah tab</b>, <b>meminimalkan browser</b>, <b>keluar dari layar penuh</b>, atau <b>membuka panel asisten AI / jendela lain</b> saat mengerjakan ujian.";
     const box = $("cheatModal");
     box.innerHTML = `
       <div class="kotak">
@@ -417,6 +472,7 @@
   function resumeAfterUnblock() {
     const wasBlocked = cheatBlocked;
     hideCheatWarning();
+    grantFocusGrace(1500);
     if (wasBlocked) {
       const c = document.createElement("i");
       c.className = "conf";
@@ -454,6 +510,44 @@
     showCheatWarning();
     updateParticipantStatus("blocked");
   });
+
+  /* =========================================================
+     ANTI-CHEAT: deteksi kehilangan fokus jendela (menangkap
+     kasus membuka panel asisten AI / Copilot / Gemini / jendela
+     lain). Halaman web TIDAK bisa menutup panel itu, jadi kita
+     deteksi lalu blokir seperti kecurangan biasa.
+     ========================================================= */
+  window.addEventListener("blur", () => {
+    if (!quizActive || cheatBlocked) return;
+    if (suppressBlurCheck || focusGraceActive()) return;
+    triggerCheatBlock(
+      "Kamu terdeteksi <b>berpindah jendela atau membuka panel asisten AI</b> (mis. Copilot/Gemini) saat ujian.",
+    );
+  });
+
+  /* pemantau cadangan: sebagian kasus klik panel AI tidak memicu blur */
+  focusIntervalId = setInterval(() => {
+    if (!quizActive || cheatBlocked) return;
+    if (suppressBlurCheck || focusGraceActive()) return;
+    if (document.hidden) return; // sudah ditangani visibilitychange
+    if (!document.hasFocus()) {
+      triggerCheatBlock(
+        "Kamu terdeteksi <b>berpindah jendela atau membuka panel asisten AI</b> (mis. Copilot/Gemini) saat ujian.",
+      );
+    }
+  }, 800);
+
+  /* ===== mode layar penuh: keluar saat ujian berlangsung = curang ===== */
+  function onFullscreenChange() {
+    if (!quizActive || cheatBlocked) return;
+    if (suppressBlurCheck || focusGraceActive()) return;
+    if (!isFullscreen()) {
+      triggerCheatBlock("Kamu <b>keluar dari mode layar penuh</b> saat ujian berlangsung.");
+    }
+  }
+  document.addEventListener("fullscreenchange", onFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+  document.addEventListener("msfullscreenchange", onFullscreenChange);
 
   /* =========================================================
      ANTI-CHEAT TAMBAHAN (aktif HANYA saat quizActive === true)
@@ -666,6 +760,7 @@
     const s = S.score;
     const nilai = s * 9 + 10;
     quizActive = false;
+    exitFullscreenLock();
     $("endt").textContent = s >= 9 ? "Luar biasa, " + S.n + "!" : s >= 6 ? "Bagus, " + S.n + "!" : "Tetap semangat, " + S.n + "!";
     $("en").textContent = nilai;
     $("ed").innerHTML = `Benar <b>${s}</b> dari ${N} soal.<br>Nilai kamu <b>${nilai}</b>. Rekor beruntun ${S.best} soal.<br>No. presensi ${S.a}.`;
@@ -694,6 +789,7 @@
     cheatBlocked = false;
     hideCheatWarning();
     subscribeParticipantStatus();
+    await requestFullscreenLock();
     papan(); statistik(); show("app")
   };
 
@@ -738,6 +834,7 @@
     activeParticipantName = n;
     quizActive = true;
     subscribeParticipantStatus();
+    await requestFullscreenLock();
     papan(); statistik(); show("app")
   };
 
@@ -745,6 +842,7 @@
   $("beranda").onclick = () => {
     quizActive = false;
     cheatBlocked = false;
+    exitFullscreenLock();
     hideCheatWarning();
     teardownParticipantChannel();
     activeParticipantId = null; activeParticipantName = null;
